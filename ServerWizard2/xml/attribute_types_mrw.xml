@@ -1,0 +1,836 @@
+<attributes>
+	<enumerationType>
+		<id>MRU_PREFIX</id>
+		<description>Prefix to generate MRU_ID's</description>
+		<enumerator>
+			<name>UNKNOWN</name>
+			<value>0xFFFF</value>
+		</enumerator>
+		<enumerator>
+			<name>PROC</name>
+			<value>0x0001</value>
+		</enumerator>
+		<enumerator>
+			<name>MEMBUF</name>
+			<value>0x0006</value>
+		</enumerator>
+		<enumerator>
+			<name>SP-CHIP</name>
+			<value>0x0009</value>
+		</enumerator>
+		<enumerator>
+			<name>SP-IOU-CHIP</name>
+			<value>0x000A</value>
+		</enumerator>
+		<enumerator>
+			<name>BUILTIN-IO</name>
+			<value>0x000B</value>
+		</enumerator>
+		<enumerator>
+			<name>FLASH-CHIP</name>
+			<value>0x000D</value>
+		</enumerator>
+		<enumerator>
+			<name>APSS</name>
+			<value>0x000E</value>
+		</enumerator>
+		<enumerator>
+			<name>DPSS</name>
+			<value>0x000F</value>
+		</enumerator>
+		<enumerator>
+			<name>MODULE</name>
+			<value>0x0100</value>
+		</enumerator>
+		<enumerator>
+			<name>RISER-CARD</name>
+			<value>0x0101</value>
+		</enumerator>
+		<enumerator>
+			<name>VRM-CARD</name>
+			<value>0x0104</value>
+		</enumerator>
+		<enumerator>
+			<name>CARD-ASM</name>
+			<value>0x0103</value>
+		</enumerator>
+		<enumerator>
+			<name>OCC</name>
+			<value>0x0201</value>
+		</enumerator>
+		<enumerator>
+			<name>EX</name>
+			<value>0x0202</value>
+		</enumerator>
+		<enumerator>
+			<name>CORE</name>
+			<value>0x0203</value>
+		</enumerator>
+		<enumerator>
+			<name>L2</name>
+			<value>0x0204</value>
+		</enumerator>
+		<enumerator>
+			<name>L3</name>
+			<value>0x0205</value>
+		</enumerator>
+		<enumerator>
+			<name>NCU</name>
+			<value>0x0206</value>
+		</enumerator>
+		<enumerator>
+			<name>MCS</name>
+			<value>0x0207</value>
+		</enumerator>
+		<enumerator>
+			<name>NX</name>
+			<value>0x0208</value>
+		</enumerator>
+		<enumerator>
+			<name>CAPP</name>
+			<value>0x0209</value>
+		</enumerator>
+		<enumerator>
+			<name>SLW</name>
+			<value>0x020A</value>
+		</enumerator>
+		<enumerator>
+			<name>AS</name>
+			<value>0x020B</value>
+		</enumerator>
+		<enumerator>
+			<name>SBE</name>
+			<value>0x020C</value>
+		</enumerator>
+		<enumerator>
+			<name>L4</name>
+			<value>0x020D</value>
+		</enumerator>
+		<enumerator>
+			<name>MBA</name>
+			<value>0x020E</value>
+		</enumerator>
+		<enumerator>
+			<name>ABUS</name>
+			<value>0x0301</value>
+		</enumerator>
+		<enumerator>
+			<name>XBUS</name>
+			<value>0x0302</value>
+		</enumerator>
+		<enumerator>
+			<name>PCI</name>
+			<value>0x0303</value>
+		</enumerator>
+	</enumerationType>
+	<enumerationType>
+		<id>DIRECTION</id>
+		<description>Bus Directions</description>
+		<enumerator>
+			<name>IN</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>OUT</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>INOUT</name>
+			<value>2</value>
+		</enumerator>
+		<default>INOUT</default>
+	</enumerationType>
+	<enumerationType>
+		<id>RAIL_NAME</id>
+		<description>Power supply rail name</description>
+		<enumerator>
+			<name>UNKNOWN</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>VDDR</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>VDD</name>
+			<value>2</value>
+		</enumerator>
+		<default>UNKNOWN</default>
+	</enumerationType>
+	<enumerationType>
+		<id>GPIO_TYPE</id>
+		<description>Type of GPIO</description>
+		<enumerator>
+			<name>GENERIC_INPUT</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>GENERIC_OUTPUT</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>PGOOD</name>
+			<value>2</value>
+		</enumerator>
+		<enumerator>
+			<name>ENABLE</name>
+			<value>3</value>
+		</enumerator>
+		<default>GENERIC_OUTPUT</default>
+	</enumerationType>
+	<enumerationType>
+		<id>VPD_TYPE</id>
+		<description>Types of VPD</description>
+		<enumerator>
+			<name>NA</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>MVPD</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>CVPD</name>
+			<value>2</value>
+		</enumerator>
+		<enumerator>
+			<name>SPD</name>
+			<value>3</value>
+		</enumerator>
+		<enumerator>
+			<name>BOARD</name>
+			<value>4</value>
+		</enumerator>
+		<enumerator>
+			<name>SBE</name>
+			<value>5</value>
+		</enumerator>
+		<default>NA</default>
+	</enumerationType>
+	<enumerationType>
+		<id>BUS_TYPE</id>
+		<description>Enumeration for bus types</description>
+		<enumerator>
+			<name>NA</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>ABUS</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>XBUS</name>
+			<value>2</value>
+		</enumerator>
+		<enumerator>
+			<name>PCIE</name>
+			<value>3</value>
+		</enumerator>
+		<enumerator>
+			<name>FSIM</name>
+			<value>4</value>
+		</enumerator>
+		<enumerator>
+			<name>I2C</name>
+			<value>5</value>
+		</enumerator>
+		<enumerator>
+			<name>GPIO</name>
+			<value>6</value>
+		</enumerator>
+		<enumerator>
+			<name>DMI</name>
+			<value>7</value>
+		</enumerator>
+		<enumerator>
+			<name>DDR3</name>
+			<value>8</value>
+		</enumerator>
+		<enumerator>
+			<name>DDR4</name>
+			<value>9</value>
+		</enumerator>
+		<enumerator>
+			<name>POWER</name>
+			<value>10</value>
+		</enumerator>
+		<enumerator>
+			<name>FSICM</name>
+			<value>11</value>
+		</enumerator>
+	</enumerationType>
+	<enumerationType>
+		<id>MRW_TYPE</id>
+		<enumerator>
+			<name>NA</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>VPD</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>PCI_CONFIG</name>
+			<value>2</value>
+		</enumerator>
+		<enumerator>
+			<name>GPIO_EXPANDER</name>
+			<value>3</value>
+		</enumerator>
+		<enumerator>
+			<name>VOLTAGE_REGULATOR</name>
+			<value>4</value>
+		</enumerator>
+		<default>NA</default>
+	</enumerationType>
+	
+	<attribute>
+		<id>BUS_TYPE</id>
+		<description>Bus Type
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>BUS_TYPE</id>
+			</enumeration>
+		</simpleType>
+		<persistency>volatile-zeroed</persistency>
+		<readable />
+		<writeable />
+	</attribute>
+
+	<attribute>
+		<id>DIRECTION</id>
+		<description>Bus Direction
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>DIRECTION</id>
+			</enumeration>
+		</simpleType>
+		<persistency>volatile-zeroed</persistency>
+		<readable />
+		<writeable />
+	</attribute>
+	<attribute>
+		<id>MRU_PREFIX</id>
+		<description>Prefix to generate MRU_ID's with
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>MRU_PREFIX</id>
+			</enumeration>
+		</simpleType>
+		<persistency>volatile-zeroed</persistency>
+		<readable />
+		<writeable />
+	</attribute>
+	<attribute>
+		<id>MRW_TYPE</id>
+		<description>Attribute indicating the target's special MRW type
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>MRW_TYPE</id>
+			</enumeration>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+		<hasStringConversion />
+	</attribute>
+	<attribute>
+		<id>LOCATION_CODE</id>
+		<description>Location Code</description>
+		<simpleType>
+			<string>
+			</string>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>FSI_ENGINE</id>
+		<description>FSI engine number</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>FSI_PORT</id>
+		<description>FSI port number</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>FSI_LINK</id>
+		<description>FSI Link number</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>CMFSI</id>
+		<description>CMFSI number</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>I2C_PORT</id>
+		<description>I2C Port</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>I2C_ENGINE</id>
+		<description>I2C Engine</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>I2C_ADDRESS</id>
+		<description>I2C Address</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>I2C_SPEED</id>
+		<description>I2C Speed in kHz</description>
+		<simpleType>
+			<uint16_t>
+			</uint16_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>VPD_TYPE</id>
+		<description>MVPD,CVPD, or SPD</description>
+		<simpleType>
+			<enumeration>
+				<id>VPD_TYPE</id>
+			</enumeration>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>SYSTEM_NAME</id>
+		<description>System Name</description>
+		<simpleType>
+			<string></string>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+	</attribute>
+	<attribute>
+		<id>PROC_TX_LANE_INVERT</id>
+		<description>
+			This attribute represents the polarity of a differential wire pair on the
+			DMI and A buses.
+			creator: platform (generated based on MRW data)
+			See defintion in common_attributes.xml for more information.
+		</description>
+		<simpleType>
+			<uint32_t>
+				<default>0</default>
+			</uint32_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>MEMBUF_TX_LANE_INVERT</id>
+		<description>
+			This attribute represents the polarity of a differential wire pair on the
+			DMI and A buses.
+			creator: platform (generated based on MRW data)
+			See defintion in common_attributes.xml for more information.
+		</description>
+		<simpleType>
+			<uint32_t>
+				<default>0</default>
+			</uint32_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>SOURCE_TX_LANE_INVERT</id>
+		<description>
+			This attribute represents the polarity of a differential wire pair on the
+			DMI and A buses.
+			creator: platform (generated based on MRW data)
+			See defintion in common_attributes.xml for more information.
+		</description>
+		<simpleType>
+			<uint32_t>
+				<default>0</default>
+			</uint32_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>DEST_TX_LANE_INVERT</id>
+		<description>
+			This attribute represents the polarity of a differential wire pair on the
+			DMI and A buses.
+			creator: platform (generated based on MRW data)
+			See defintion in common_attributes.xml for more information.
+		</description>
+		<simpleType>
+			<uint32_t>
+				<default>0</default>
+			</uint32_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PROC_TX_MSBSWAP</id>
+		<description>
+			Source: MRW: Downstream MSB Swap and Upstream MSB Swap
+			Usage: TX_MSBSWAP initfile setting for DMI and A buses
+
+			This attribute represents whether or not a single clock group bus such as
+			DMI and A bus was wired by the board designer using a feature
+			called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX
+			chip where 'n' is the width of the bus. A basic description
+			of this capability is that the board designer can save layers on the
+			board wiring by crossing the wiring between the two chips in
+			a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip
+			wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
+			If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1'
+			of the RX chip, lane 1 to lane 'n-2', etc. Random or
+			arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
+
+			The Master Chip of two connected chips is defined as the chip with the
+			smaller value of (100*Node + Pos).
+			The Slave Chip of two connected chips is defined as the chip with the
+			larger value of (100*Node + Pos).
+			The Downstream direction is defined as the direction from the Master
+			chip to the Slave chip.
+			The Upstream direction is defined as the direction from the Slave chip
+			to the Master chip.
+
+			The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Downstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Upstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP
+			value for the correct target endpoints.
+
+		</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>MEMBUF_TX_MSBSWAP</id>
+		<description>
+			Source: MRW: Downstream MSB Swap and Upstream MSB Swap
+			Usage: TX_MSBSWAP initfile setting for DMI and A buses
+
+			This attribute represents whether or not a single clock group bus such as
+			DMI and A bus was wired by the board designer using a feature
+			called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX
+			chip where 'n' is the width of the bus. A basic description
+			of this capability is that the board designer can save layers on the
+			board wiring by crossing the wiring between the two chips in
+			a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip
+			wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
+			If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1'
+			of the RX chip, lane 1 to lane 'n-2', etc. Random or
+			arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
+
+			The Master Chip of two connected chips is defined as the chip with the
+			smaller value of (100*Node + Pos).
+			The Slave Chip of two connected chips is defined as the chip with the
+			larger value of (100*Node + Pos).
+			The Downstream direction is defined as the direction from the Master
+			chip to the Slave chip.
+			The Upstream direction is defined as the direction from the Slave chip
+			to the Master chip.
+
+			The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Downstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Upstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP
+			value for the correct target endpoints.
+
+		</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>DEST_TX_MSBSWAP</id>
+		<description>
+			Source: MRW: Downstream MSB Swap and Upstream MSB Swap
+			Usage: TX_MSBSWAP initfile setting for DMI and A buses
+
+			This attribute represents whether or not a single clock group bus such as
+			DMI and A bus was wired by the board designer using a feature
+			called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX
+			chip where 'n' is the width of the bus. A basic description
+			of this capability is that the board designer can save layers on the
+			board wiring by crossing the wiring between the two chips in
+			a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip
+			wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
+			If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1'
+			of the RX chip, lane 1 to lane 'n-2', etc. Random or
+			arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
+
+			The Master Chip of two connected chips is defined as the chip with the
+			smaller value of (100*Node + Pos).
+			The Slave Chip of two connected chips is defined as the chip with the
+			larger value of (100*Node + Pos).
+			The Downstream direction is defined as the direction from the Master
+			chip to the Slave chip.
+			The Upstream direction is defined as the direction from the Slave chip
+			to the Master chip.
+
+			The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Downstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Upstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP
+			value for the correct target endpoints.
+
+		</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>SOURCE_TX_MSBSWAP</id>
+		<description>
+			Source: MRW: Downstream MSB Swap and Upstream MSB Swap
+			Usage: TX_MSBSWAP initfile setting for DMI and A buses
+
+			This attribute represents whether or not a single clock group bus such as
+			DMI and A bus was wired by the board designer using a feature
+			called MSB Swap where lane 0 of the TX chip wires to lane n-1 on the RX
+			chip where 'n' is the width of the bus. A basic description
+			of this capability is that the board designer can save layers on the
+			board wiring by crossing the wiring between the two chips in
+			a prescribed manner. In a non-MSB Swapped bus Lane 0 on the TX chip
+			wires to lane 0 on the RX chip, lane 1 to lane 1 and so on.
+			If a bus is MSB Swapped then lane 0 of the TX chip wires to lane 'n-1'
+			of the RX chip, lane 1 to lane 'n-2', etc. Random or
+			arbitrary wiring of TX to RX lanes on different chips is NOT ALLOWED.
+
+			The Master Chip of two connected chips is defined as the chip with the
+			smaller value of (100*Node + Pos).
+			The Slave Chip of two connected chips is defined as the chip with the
+			larger value of (100*Node + Pos).
+			The Downstream direction is defined as the direction from the Master
+			chip to the Slave chip.
+			The Upstream direction is defined as the direction from the Slave chip
+			to the Master chip.
+
+			The Downstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Downstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			The Upstream TX_MSBSWAP from the MRW is a uint8 value. 0x01 means the
+			Upstream bus is wired msb to lsb etc. and
+			0x00 means the bus is wired normally, msb to msb, lsb to lsb (lane0 to
+			lane0).
+
+			It is up to the platform code to set up each ATTR_EI_BUS_TX_MSBSWAP
+			value for the correct target endpoints.
+
+		</description>
+		<simpleType>
+			<uint8_t>
+			</uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>RAIL_NAME</id>
+		<description>Name of power supply rail
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>RAIL_NAME</id>
+				<default>UNKNOWN</default>
+			</enumeration>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<hasStringConversion />
+		<readable />
+	</attribute>
+	<attribute>
+		<id>GPIO_TYPE</id>
+		<description>Type of GPIO
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>GPIO_TYPE</id>
+				<default>GENERIC_OUTPUT</default>
+			</enumeration>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<hasStringConversion />
+		<readable />
+	</attribute>
+	<attribute>
+		<id>IOP_NUM</id>
+		<description># of IOP
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PHB_NUM</id>
+		<description># of PHB
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PCIE_NUM_LANES</id>
+		<description># of PCIE lanes enabled for this interface
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PCIE_LANE_MASK</id>
+		<description>Lane mask for this config
+		</description>
+		<simpleType>
+			<uint16_t></uint16_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PCIE_LANE_SET</id>
+		<description>Lane set for this config
+		</description>
+		<simpleType>
+			<uint16_t></uint16_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+
+	<attribute>
+		<id>ENABLE_CAPI</id>
+		<description>enables CAPI function (0=no,1=yes)
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>LANE_SWAP</id>
+		<description>Lane Swap (0=no,1=yes)
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>LANE_REVERSAL</id>
+		<description>Lane Reversal (0=no,1=yes)
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PCIE_CONFIG_NUM</id>
+		<description>PCIe config id
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+
+	<attribute>
+		<id>PCIE_CONFIG_SELECTED</id>
+		<description>Specifies if this config is selected
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>SCHEMATIC_INTERFACE</id>
+		<description>Schematic name
+		</description>
+		<simpleType>
+			<string></string>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	
+</attributes>
