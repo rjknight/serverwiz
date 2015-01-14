@@ -258,6 +258,10 @@
 			<name>FSICM</name>
 			<value>11</value>
 		</enumerator>
+		<enumerator>
+			<name>LOGICAL_ASSOCIATION</name>
+			<value>12</value>
+		</enumerator>
 	</enumerationType>
 	<enumerationType>
 		<id>MRW_TYPE</id>
@@ -281,9 +285,28 @@
 			<name>VOLTAGE_REGULATOR</name>
 			<value>4</value>
 		</enumerator>
+		<enumerator>
+			<name>SPD</name>
+			<value>5</value>
+		</enumerator>		
 		<default>NA</default>
 	</enumerationType>
-	
+	<enumerationType>
+		<id>ASSOCIATION_TYPE</id>
+		<enumerator>
+			<name>NA</name>
+			<value>0</value>
+		</enumerator>
+		<enumerator>
+			<name>VPD</name>
+			<value>1</value>
+		</enumerator>
+		<enumerator>
+			<name>LED</name>
+			<value>2</value>
+		</enumerator>
+		<default>NA</default>
+	</enumerationType>	
 	<attribute>
 		<id>BUS_TYPE</id>
 		<description>Bus Type
@@ -832,5 +855,17 @@
 		<persistency>non-volatile</persistency>
 		<readable />
 	</attribute>
-	
+	<attribute>
+		<id>ASSOCIATION_TYPE</id>
+		<description>Associates 2 parts together
+		</description>
+		<simpleType>
+			<enumeration>
+				<id>ASSOCIATION_TYPE</id>
+				<default>NA</default>
+			</enumeration>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
 </attributes>

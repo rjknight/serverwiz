@@ -22,6 +22,8 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -38,8 +40,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.layout.RowData;
 
 public class MainDialog extends Dialog {
 	private Table table;
@@ -83,6 +83,7 @@ public class MainDialog extends Dialog {
 	private Label lblInstanceType;
 	private Composite compositeInstance;
 	private Composite composite;
+	private Label lblNewLabel;
 
 	/**
 	 * Create the dialog.
@@ -114,18 +115,23 @@ public class MainDialog extends Dialog {
 		container.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		tableEditor = new Vector<TableEditor>();
 		container.setLayout(new GridLayout(1, false));
+		
+		lblNewLabel = new Label(container, SWT.NONE);
+		lblNewLabel.setForeground(SWTResourceManager.getColor(SWT.COLOR_LINK_FOREGROUND));
+		lblNewLabel.setText("To start a new system, click on 'sys-0' instance, then chose instance type, then click 'Add Instance' button");
 				
 		composite = new Composite(container, SWT.NONE);
 		RowLayout rl_composite = new RowLayout(SWT.HORIZONTAL);
+		rl_composite.wrap = false;
 		rl_composite.fill = true;
 		composite.setLayout(rl_composite);
-		GridData gd_composite = new GridData(SWT.LEFT, SWT.TOP, true, false, 1, 1);
-		gd_composite.widthHint = 838;
-		gd_composite.heightHint = 121;
+		GridData gd_composite = new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1);
+		gd_composite.widthHint = 918;
+		gd_composite.heightHint = 107;
 		composite.setLayoutData(gd_composite);
 
 		compositeInstance = new Composite(composite, SWT.BORDER);
-		compositeInstance.setLayoutData(new RowData(416, SWT.DEFAULT));
+		compositeInstance.setLayoutData(new RowData(402, SWT.DEFAULT));
 		compositeInstance.setLayout(new GridLayout(3, false));
 
 		lblInstanceType = new Label(compositeInstance, SWT.NONE);
@@ -135,7 +141,7 @@ public class MainDialog extends Dialog {
 		
 				combo = new Combo(compositeInstance, SWT.NONE);
 				GridData gd_combo = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-				gd_combo.widthHint = 45;
+				gd_combo.widthHint = 167;
 				combo.setLayoutData(gd_combo);
 				combo.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		
@@ -166,10 +172,13 @@ public class MainDialog extends Dialog {
 		lblName.setText("Custom Name:");
 
 		txtInstanceName = new Text(compositeInstance, SWT.BORDER);
-		txtInstanceName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		GridData gd_txtInstanceName = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_txtInstanceName.widthHint = 175;
+		txtInstanceName.setLayoutData(gd_txtInstanceName);
 		txtInstanceName.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 
 		compositeBus = new Composite(composite, SWT.BORDER);
+		compositeBus.setLayoutData(new RowData(420, SWT.DEFAULT));
 						
 								btnDeleteTarget = new Button(compositeInstance, SWT.NONE);
 								btnDeleteTarget.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -329,7 +338,7 @@ public class MainDialog extends Dialog {
 
 		TableColumn tc1 = new TableColumn(table, SWT.CENTER);
 		tc1.setText("Attribute");
-		tc1.setWidth(223);
+		tc1.setWidth(256);
 
 		TableColumn tc2 = new TableColumn(table, SWT.CENTER);
 		tc2.setText("Field");
@@ -337,11 +346,11 @@ public class MainDialog extends Dialog {
 
 		TableColumn tc3 = new TableColumn(table, SWT.LEFT);
 		tc3.setText("Value");
-		tc3.setWidth(100);
+		tc3.setWidth(101);
 
 		TableColumn tc4 = new TableColumn(table, SWT.LEFT);
 		tc4.setText("Description");
-		tc4.setWidth(416);
+		tc4.setWidth(373);
 
 		table.setHeaderVisible(true);
 
@@ -356,6 +365,7 @@ public class MainDialog extends Dialog {
 		controller.init();
 
 		this.setDirtyState(false);
+		updateView();
 		// load file if passed on command line
 		if (!mrwFilename.isEmpty()) {
 			ServerWizard2.LOGGER.info("Loading MRW: " + mrwFilename);
@@ -601,6 +611,12 @@ public class MainDialog extends Dialog {
 
 	public void updateView() {
 		Target targetInstance = getSelectedTarget();
+		if (targetInstance==null) {
+			btnDeleteTarget.setEnabled(false);
+			btnCopyInstance.setEnabled(false);
+			updateConnectionCombos();
+			return;
+		}
 		updateChildCombo(targetInstance);
 		clearTable();
 		updateAttributes(targetInstance);
@@ -627,8 +643,7 @@ public class MainDialog extends Dialog {
 		for (Map.Entry<String, Attribute> entry : targetInstance.getAttributes().entrySet()) {
 
 			Attribute attribute = entry.getValue();
-			Boolean showAttribute = (!priority) && (!connectivity)
-					|| (priority && attribute.priority) || (connectivity && attribute.connectivity);
+			Boolean showAttribute = !attribute.hide;
 
 			if (showAttribute) {
 				if (attribute.getValue() instanceof AttributeValueComplex) {
@@ -817,6 +832,9 @@ public class MainDialog extends Dialog {
 	}
 
 	public void clearTreeAll() {
+		if (tree.getColumnCount() > 0) {
+			tree.getColumn(0).dispose();
+		}
 		clearTree(tree.getItem(0));
 		tree.removeAll();
 	}
@@ -849,6 +867,8 @@ public class MainDialog extends Dialog {
 		if (parentItem == null) {
 			TreeColumn columnName = new TreeColumn(tree, SWT.VIRTUAL);
 			columnName.setText("Instances");
+			columnName.setToolTipText("To add a new instance, choose parent instance.  A list of child instances will appear in Instance Type combo.\r\n"
+					+ "Select and Instance type.  You can optionally enter a custom name.  Then click 'Add Instance' button.");
 			int width = tree.getSize().x-25;
 			if (width==0) { width=300; }
 			columnName.setWidth(width);
@@ -898,6 +918,8 @@ public class MainDialog extends Dialog {
 		}
 		TreeColumn columnName = new TreeColumn(treeBus, SWT.VIRTUAL);
 		columnName.setText("Connections");
+		columnName.setToolTipText("To add a new bus, first select an instance of a card in instances view, then choose bus type.\r\n"
+				+ "If a bus is available, then sources and destinations will appear in connections combos.");
 		int width = treeBus.getSize().x-25;
 		if (width==0) { width=300; }
 		columnName.setWidth(width);

@@ -33,7 +33,7 @@
 		<child_id>pci_configs</child_id>
 		<hidden_child_id>pci-0</hidden_child_id>
 		<hidden_child_id>pci-1</hidden_child_id>
-		<hidden_child_id>pci-2</hidden_child_id>				
+		<hidden_child_id>pci-2</hidden_child_id>
 		<hidden_child_id>pci-3</hidden_child_id>
 		<child_id>abus-0</child_id>
 		<child_id>abus-1</child_id>
@@ -67,14 +67,14 @@
 			<value>0</value>
 		</attribute>
 	</target_instance>
-	
+
 	<target_instance>
 		<id>unit-ex-venice</id>
 		<instance_id>ex</instance_id>
 		<child_id>core-0</child_id>
 	</target_instance>
-	
-		
+
+
 	<target_instance>
 		<id>unit-ex-venice</id>
 		<instance_id>ex-1</instance_id>
@@ -203,7 +203,7 @@
 			<value>0</value>
 		</attribute>
 	</target_instance>
-	
+
 	<!-- PCIe instances -->
 	<target_instance>
 		<id>unit-pciconfig-venice</id>
@@ -214,7 +214,7 @@
 		<child_id>iop1_config1_phb2_x8</child_id>
 	</target_instance>
 
-<!-- IOP0 config 0: PHB0=x16 -->
+	<!-- IOP0 config 0: PHB0=x16 -->
 	<target_instance>
 		<id>unit-pci-venice</id>
 		<instance_id>iop0_config0_phb0_x16</instance_id>
@@ -225,15 +225,15 @@
 		<attribute>
 			<attribute_id>PCIE_NUM_LANES</attribute_id>
 			<value>16</value>
-		</attribute>				
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_LANE_MASK</attribute_id>
 			<value>0xFFFF</value>
-		</attribute>				
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_LANE_SET</attribute_id>
 			<value>0</value>
-		</attribute>				
+		</attribute>
 		<attribute>
 			<attribute_id>PHB_NUM</attribute_id>
 			<value>0</value>
@@ -241,11 +241,11 @@
 		<attribute>
 			<attribute_id>IOP_NUM</attribute_id>
 			<value>0</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_CONFIG_NUM</attribute_id>
 			<value>0</value>
-		</attribute>			
+		</attribute>
 		<attribute>
 			<attribute_id>SCHEMATIC_INTERFACE</attribute_id>
 			<value>PCIE E0</value>
@@ -266,29 +266,29 @@
 		<attribute>
 			<attribute_id>PCIE_LANE_MASK</attribute_id>
 			<value>0xFFFF</value>
-		</attribute>				
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_LANE_SET</attribute_id>
 			<value>0</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PHB_NUM</attribute_id>
 			<value>1</value>
-		</attribute>						
+		</attribute>
 		<attribute>
 			<attribute_id>IOP_NUM</attribute_id>
 			<value>1</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_CONFIG_NUM</attribute_id>
 			<value>0</value>
-		</attribute>			
+		</attribute>
 		<attribute>
 			<attribute_id>SCHEMATIC_INTERFACE</attribute_id>
 			<value>PCIE E1</value>
 		</attribute>
 	</target_instance>
-	
+
 	<!-- IOP1 config 1: PHB1=x8, PHB2=x8 -->
 	<target_instance>
 		<id>unit-pci-venice</id>
@@ -304,11 +304,11 @@
 		<attribute>
 			<attribute_id>PCIE_LANE_MASK</attribute_id>
 			<value>0xFF00</value>
-		</attribute>						
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_LANE_SET</attribute_id>
 			<value>0</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PHB_NUM</attribute_id>
 			<value>1</value>
@@ -316,11 +316,11 @@
 		<attribute>
 			<attribute_id>IOP_NUM</attribute_id>
 			<value>1</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_CONFIG_NUM</attribute_id>
 			<value>1</value>
-		</attribute>	
+		</attribute>
 		<attribute>
 			<attribute_id>SCHEMATIC_INTERFACE</attribute_id>
 			<value>PCIE E1</value>
@@ -332,7 +332,7 @@
 		<attribute>
 			<attribute_id>CHIP_UNIT</attribute_id>
 			<value>1</value>
-		</attribute>					
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_NUM_LANES</attribute_id>
 			<value>8</value>
@@ -340,11 +340,11 @@
 		<attribute>
 			<attribute_id>PCIE_LANE_MASK</attribute_id>
 			<value>0x00FF</value>
-		</attribute>						
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_LANE_SET</attribute_id>
 			<value>1</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PHB_NUM</attribute_id>
 			<value>2</value>
@@ -352,7 +352,7 @@
 		<attribute>
 			<attribute_id>IOP_NUM</attribute_id>
 			<value>1</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>PCIE_CONFIG_NUM</attribute_id>
 			<value>1</value>
@@ -369,21 +369,23 @@
 			<attribute_id>CHIP_UNIT</attribute_id>
 			<value>0</value>
 		</attribute>
-	</target_instance>		<target_instance>
+	</target_instance>
+	<target_instance>
 		<id>unit-pci-venice</id>
 		<instance_id>pci-1</instance_id>
 		<attribute>
 			<attribute_id>CHIP_UNIT</attribute_id>
 			<value>1</value>
 		</attribute>
-	</target_instance>		<target_instance>
+	</target_instance>
+	<target_instance>
 		<id>unit-pci-venice</id>
 		<instance_id>pci-2</instance_id>
 		<attribute>
 			<attribute_id>CHIP_UNIT</attribute_id>
 			<value>2</value>
 		</attribute>
-	</target_instance>		
+	</target_instance>
 	<target_instance>
 		<id>unit-pci-venice</id>
 		<instance_id>pci-3</instance_id>
@@ -391,7 +393,7 @@
 			<attribute_id>CHIP_UNIT</attribute_id>
 			<value>3</value>
 		</attribute>
-	</target_instance>	
+	</target_instance>
 	<target_instance>
 		<id>unit-mcs-venice</id>
 		<instance_id>mcs-0</instance_id>
@@ -440,7 +442,7 @@
 			<value>M0 DMI C</value>
 		</attribute>
 	</target_instance>
-	
+
 	<target_instance>
 		<id>unit-mcs-venice</id>
 		<instance_id>mcs-4</instance_id>
@@ -489,7 +491,7 @@
 			<value>M0 DMI C</value>
 		</attribute>
 	</target_instance>
-	
+
 	<target_instance>
 		<id>unit-capp-venice</id>
 		<instance_id>capp-0</instance_id>
@@ -606,7 +608,7 @@
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
 			<value>3</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
 			<value>0x01</value>
@@ -630,11 +632,11 @@
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
 			<value>2</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
 			<value>0x02</value>
-		</attribute>		
+		</attribute>
 	</target_instance>
 	<target_instance>
 		<id>unit-fsi-membuf</id>
@@ -654,11 +656,11 @@
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
 			<value>7</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
 			<value>0x03</value>
-		</attribute>		
+		</attribute>
 	</target_instance>
 	<target_instance>
 		<id>unit-i2c-slave</id>
@@ -678,7 +680,7 @@
 		<attribute>
 			<attribute_id>I2C_PORT</attribute_id>
 			<value>0x00</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>I2C_ENGINE</attribute_id>
 			<value>0x01</value>
@@ -694,7 +696,7 @@
 		<attribute>
 			<attribute_id>I2C_PORT</attribute_id>
 			<value>0x01</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>I2C_ENGINE</attribute_id>
 			<value>0x01</value>
@@ -714,11 +716,11 @@
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
 			<value>0</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
 			<value>0x00</value>
-		</attribute>				
+		</attribute>
 	</target_instance>
 	<target_instance>
 		<id>unit-fsi-proc</id>
@@ -734,11 +736,11 @@
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
 			<value>1</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
 			<value>0x01</value>
-		</attribute>				
+		</attribute>
 	</target_instance>
 	<target_instance>
 		<id>unit-fsi-proc</id>
@@ -754,11 +756,11 @@
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
 			<value>2</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
 			<value>0x02</value>
-		</attribute>				
+		</attribute>
 	</target_instance>
 	<target_instance>
 		<id>chip-vpd-device</id>
@@ -815,7 +817,7 @@
 			<value>0</value>
 		</attribute>
 	</target_instance>
-	
+
 	<target_instance>
 		<id>unit-dmi-centaur</id>
 		<instance_id>dmi</instance_id>
@@ -866,7 +868,7 @@
 		<attribute>
 			<attribute_id>I2C_PORT</attribute_id>
 			<value>0</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>I2C_ENGINE</attribute_id>
 			<value>0</value>
@@ -882,14 +884,14 @@
 		<attribute>
 			<attribute_id>I2C_PORT</attribute_id>
 			<value>1</value>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<attribute_id>I2C_ENGINE</attribute_id>
 			<value>0</value>
-		</attribute>		
+		</attribute>
 	</target_instance>
 	<!-- Vreg DEvice -->
-		<target_instance>
+	<target_instance>
 		<id>chip-vreg-generic</id>
 		<instance_id>vreg</instance_id>
 		<child_id>vreg_enable</child_id>
@@ -915,15 +917,15 @@
 		<attribute>
 			<attribute_id>RAIL_NAME</attribute_id>
 			<value>VDDR</value>
-		</attribute>		
+		</attribute>
 	</target_instance>
 
-	
+
 	<!-- VPD Device -->
 
 	<target_instance>
 		<id>chip-vpd-device</id>
-		<instance_id>i2c</instance_id>
+		<instance_id>vpdchip</instance_id>
 		<child_id>i2c-slave</child_id>
 	</target_instance>
 
@@ -931,7 +933,7 @@
 		<id>chip-vpd-device</id>
 		<instance_id>spd</instance_id>
 		<attribute>
-			<attribute_id>VPD_TYPE</attribute_id>
+			<attribute_id>MRW_TYPE</attribute_id>
 			<value>SPD</value>
 		</attribute>
 	</target_instance>
@@ -1054,17 +1056,17 @@
 		<id>chip-pcie-endpoint</id>
 		<instance_id>pci_endpoint</instance_id>
 		<child_id>pciep</child_id>
-	</target_instance>	
+	</target_instance>
 	<target_instance>
 		<id>card-pciecard-card</id>
 		<instance_id>pciecard</instance_id>
 		<child_id>pciep</child_id>
-	</target_instance>	
+	</target_instance>
 	<target_instance>
 		<id>card-pciecard-cablecard</id>
 		<instance_id>pciecablecard</instance_id>
 		<child_id>pciep</child_id>
-	</target_instance>		
+	</target_instance>
 	<target_instance>
 		<id>unit-pcie-endpoint</id>
 		<parent_id>chip-pcie-endpoint</parent_id>
@@ -1102,6 +1104,38 @@
 		<attribute>
 			<attribute_id>CHIP_UNIT</attribute_id>
 			<value>0</value>
+		</attribute>
+	</target_instance>
+	<target_instance>
+		<id>unit-logic_assoc-generic</id>
+		<instance_id>vpd_assoc_child</instance_id>
+		<attribute>
+			<attribute_id>CHIP_UNIT</attribute_id>
+			<value>0</value>
+		</attribute>
+		<attribute>
+			<attribute_id>ASSOCIATION_TYPE</attribute_id>
+			<value>VPD</value>
+		</attribute>
+		<attribute>
+			<attribute_id>DIRECTION</attribute_id>
+			<value>IN</value>
+		</attribute>
+	</target_instance>
+	<target_instance>
+		<id>unit-logic_assoc-generic</id>
+		<instance_id>vpd_assoc_parent</instance_id>
+		<attribute>
+			<attribute_id>CHIP_UNIT</attribute_id>
+			<value>0</value>
+		</attribute>
+		<attribute>
+			<attribute_id>ASSOCIATION_TYPE</attribute_id>
+			<value>VPD</value>
+		</attribute>
+		<attribute>
+			<attribute_id>DIRECTION</attribute_id>
+			<value>OUT</value>
 		</attribute>
 	</target_instance>
 </target_instances>

@@ -36,7 +36,7 @@ sub new
         data         => undef,
         targeting    => undef,
         enumerations => undef,
-        MAX_MCS      => 8,
+        MAX_MCS      => 0,
         master_proc  => undef,
         huid_idx     => undef,
         mru_idx      => undef,
@@ -45,6 +45,7 @@ sub new
         version      => "",
         errorsExist  => 0,
         NUM_PROCS    => 0,
+        TOP_LEVEL    => "sys-0",
     };
     return bless $self, $class;
 }
@@ -66,15 +67,14 @@ sub getData
 ## loads ServerWiz XML format
 sub loadXML
 {
-    my $self     = shift;
+    my $self = shift;
     my $filename = shift;
     $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
     print "Loading MRW XML: $filename\n";
     $self->{xml} =
-      XMLin( $filename,
-        forcearray => [ 'child_id', 'hidden_child_id', 'bus' ] );
+      XMLin($filename,forcearray => [ 'child_id', 'hidden_child_id', 'bus' ]);
     $self->storeEnumerations();
-    $self->buildHierarchy("sys-0");
+    $self->buildHierarchy($self->{TOP_LEVEL});
     $self->buildAffinity();
 }
 
@@ -88,32 +88,32 @@ sub printXML
     my $t    = shift;
 
     my $atTop = 0;
-    if ( $t eq "top" )
+    if ($t eq "top")
     {
         $atTop = 1;
         $t     = $self->{targeting}->{SYS};
         print $fh "<attributes>\n";
         print $fh "<version>" . $self->{version} . "</version>\n";
     }
-    if ( ref($t) ne "ARRAY" )
+    if (ref($t) ne "ARRAY")
     {
         return;
     }
-    for ( my $p = 0 ; $p < scalar( @{$t} ) ; $p++ )
+    for (my $p = 0; $p < scalar(@{$t}); $p++)
     {
-        if ( ref( $t->[$p] ) ne "HASH" ) { next; }
+        if (ref($t->[$p]) ne "HASH") { next; }
         my $target = $t->[$p]->{KEY};
-        $self->printTarget( $fh, $target );
+        $self->printTarget($fh, $target);
         my $children = $t->[$p];
-        foreach my $u ( sort( keys %{$children} ) )
+        foreach my $u (sort(keys %{$children}))
         {
-            if ( $u eq "KEY" )
+            if ($u eq "KEY")
             {
 
             }
             else
             {
-                $self->printXML( $fh, $t->[$p]->{$u} );
+                $self->printXML($fh, $t->[$p]->{$u});
             }
         }
     }
@@ -131,17 +131,17 @@ sub printTarget
 
     my $target_ptr = $self->getTarget($target);
     print $fh "<targetInstance>\n";
-    my $target_id = $self->getAttribute( $target, "PHYS_PATH" );
-    $target_id =~ s/physical\://;
+    my $target_id = $self->getAttribute($target, "PHYS_PATH");
+    $target_id = substr($target_id, 9);
     $target_id =~ s/\///g;
     $target_id =~ s/\-//g;
     print $fh "\t<id>" . $target_id . "</id>\n";
     print $fh "\t<type>" . $self->getTargetType($target) . "</type>\n";
 
     ## get attributes
-    foreach my $attr ( sort ( keys %{ $target_ptr->{ATTRIBUTES} } ) )
+    foreach my $attr (sort (keys %{ $target_ptr->{ATTRIBUTES} }))
     {
-        $self->printAttribute( $fh, $target_ptr->{ATTRIBUTES}, $attr );
+        $self->printAttribute($fh, $target_ptr->{ATTRIBUTES}, $attr);
     }
     print $fh "</targetInstance>\n";
 }
@@ -153,35 +153,35 @@ sub printAttribute
     my $target_ptr = shift;
     my $attribute  = shift;
     my $r          = "";
-    
+
     my %filter;
-    $filter{MRW_TYPE}=1;
-    $filter{INSTANCE_PATH}=1;
-    $filter{SYSTEM_NAME}=1;
-    $filter{BUS_TYPE}=1;
-    $filter{DIRECTION}=1;
-    $filter{ENABLE_CAPI}=1;
-    $filter{PCIE_CONFIG_NUM}=1;
-    $filter{PCIE_LANE_MASK}=1;
-    $filter{PCIE_LANE_SET}=1;
-    $filter{PCIE_NUM_LANES}=1;
-    $filter{PHB_NUM}=1;
-    $filter{IOP_NUM}=1;
-    $filter{LOCATION_CODE}=1;
-    $filter{MCS_NUM}=1;
-    $filter{SCHEMATIC_INTERFACE}=1;
-    
-    if ($filter{$attribute}==1) { return; }
+    $filter{MRW_TYPE}            = 1;
+    $filter{INSTANCE_PATH}       = 1;
+    $filter{SYSTEM_NAME}         = 1;
+    $filter{BUS_TYPE}            = 1;
+    $filter{DIRECTION}           = 1;
+    $filter{ENABLE_CAPI}         = 1;
+    $filter{PCIE_CONFIG_NUM}     = 1;
+    $filter{PCIE_LANE_MASK}      = 1;
+    $filter{PCIE_LANE_SET}       = 1;
+    $filter{PCIE_NUM_LANES}      = 1;
+    $filter{PHB_NUM}             = 1;
+    $filter{IOP_NUM}             = 1;
+    $filter{LOCATION_CODE}       = 1;
+    $filter{MCS_NUM}             = 1;
+    $filter{SCHEMATIC_INTERFACE} = 1;
+
+    if ($filter{$attribute} == 1) { return; }
     print $fh "\t<attribute>\n";
     print $fh "\t\t<id>$attribute</id>\n";
     my $value = $target_ptr->{$attribute}->{default};
 
-    if ( ref($value) eq "HASH" )
+    if (ref($value) eq "HASH")
     {
-        if ( defined( $value->{field} ) )
+        if (defined($value->{field}))
         {
             print $fh "\t\t<default>\n";
-            foreach my $f ( keys %{ $value->{field} } )
+            foreach my $f (sort keys %{ $value->{field} })
             {
                 my $v = $value->{field}->{$f}->{value};
                 print $fh "\t\t\t<field><id>$f</id><value>$v</value></field>\n";
@@ -201,15 +201,10 @@ sub storeEnumerations
 {
     my $self = shift;
 
-    foreach my $enumType ( keys( %{ $self->{xml}->{enumerationType} } ) )
+    foreach my $enumType (keys(%{ $self->{xml}->{enumerationType} }))
     {
         foreach my $enum (
-            keys(
-                %{
-                    $self->{xml}->{enumerationType}->{$enumType}->{enumerator}
-                  }
-            )
-          )
+            keys(%{$self->{xml}->{enumerationType}->{$enumType}->{enumerator}}))
         {
             $self->{enumeration}->{$enumType}->{$enum} =
               $self->{xml}->{enumerationType}->{$enumType}->{enumerator}
@@ -258,40 +253,40 @@ sub buildHierarchy
     my $key             = $self->{data}->{INSTANCE_PATH} . "/" . $target;
 
     my $instance_path = $self->{data}->{INSTANCE_PATH};
-    $instance_path = "instance:" . substr( $instance_path, 1 );
-    $self->setAttribute( $key, "INSTANCE_PATH", $instance_path );
+    $instance_path = "instance:" . substr($instance_path, 1);
+    $self->setAttribute($key, "INSTANCE_PATH", $instance_path);
     $self->{data}->{TARGETS}->{$key}->{TARGET} = $target_xml;
     $self->{data}->{INSTANCE_PATH} = $old_path . "/" . $target;
 
     ## copy attributes
-    foreach my $attribute ( keys %{ $target_xml->{attribute} } )
+    foreach my $attribute (keys %{ $target_xml->{attribute} })
     {
         my $value = $target_xml->{attribute}->{$attribute}->{default};
-        if ( ref($value) eq "HASH" )
+        if (ref($value) eq "HASH")
         {
-            if ( defined( $value->{field} ) )
+            if (defined($value->{field}))
             {
-                foreach my $f ( keys %{ $value->{field} } )
+                foreach my $f (keys %{ $value->{field} })
                 {
-                    $self->setAttributeField( $key, $attribute, $f,
-                        $value->{field}{$f}{value} );
+                    $self->setAttributeField($key, $attribute, $f,
+                        $value->{field}{$f}{value});
                 }
             }
             else
             {
-                $self->setAttribute( $key, $attribute, "" );
+                $self->setAttribute($key, $attribute, "");
             }
         }
         else
         {
-            $self->setAttribute( $key, $attribute, $value );
+            $self->setAttribute($key, $attribute, $value);
         }
     }
 
     ## Save busses
-    if ( defined( $target_xml->{bus} ) )
+    if (defined($target_xml->{bus}))
     {
-        foreach my $b ( @{ $target_xml->{bus} } )
+        foreach my $b (@{ $target_xml->{bus} })
         {
             my $source_target =
               $key . "/" . $b->{source_path} . $b->{source_target};
@@ -315,22 +310,22 @@ sub buildHierarchy
             $bus_entry{SOURCE_TARGET} = $source_target;
             $bus_entry{DEST_TARGET}   = $dest_target;
             $bus_entry{BUS_TARGET}    = $b;
-            push( @{ $self->{data}->{BUSSES}->{$bus_type} }, \%bus_entry );
+            push(@{ $self->{data}->{BUSSES}->{$bus_type} }, \%bus_entry);
         }
     }
 
-    foreach my $child ( @{ $target_xml->{child_id} } )
+    foreach my $child (@{ $target_xml->{child_id} })
     {
         my $child_key = $self->{data}->{INSTANCE_PATH} . "/" . $child;
         $self->{data}->{TARGETS}->{$child_key}->{PARENT} = $key;
-        push( @{ $self->{data}->{TARGETS}->{$key}->{CHILDREN} }, $child_key );
+        push(@{ $self->{data}->{TARGETS}->{$key}->{CHILDREN} }, $child_key);
         $self->buildHierarchy($child);
     }
-    foreach my $child ( @{ $target_xml->{hidden_child_id} } )
+    foreach my $child (@{ $target_xml->{hidden_child_id} })
     {
         my $child_key = $self->{data}->{INSTANCE_PATH} . "/" . $child;
         $self->{data}->{TARGETS}->{$child_key}->{PARENT} = $key;
-        push( @{ $self->{data}->{TARGETS}->{$key}->{CHILDREN} }, $child_key );
+        push(@{ $self->{data}->{TARGETS}->{$key}->{CHILDREN} }, $child_key);
         $self->buildHierarchy($child);
     }
     $self->{data}->{INSTANCE_PATH} = $old_path;
@@ -346,81 +341,93 @@ sub buildHierarchy
 sub buildAffinity
 {
     my $self = shift;
-
     my $node      = -1;
     my $proc      = -1;
     my $node_phys = "";
     my $node_aff  = "";
-    my $dimm_tpos = 0;
 
-    foreach my $target ( sort keys %{ $self->{data}->{TARGETS} } )
+    foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
     {
         my $target_ptr = $self->{data}->{TARGETS}{$target};
         my $type       = $self->getType($target);
-        my $type_id    = $self->getEnumValue( "TYPE", $type );
-        if ( $type_id eq "" ) { $type_id = 0; }
+        my $type_id    = $self->getEnumValue("TYPE", $type);
+        if ($type_id eq "") { $type_id = 0; }
 
-        if ( $type eq "SYS" )
+        if ($type eq "SYS")
         {
             $proc = -1;
             $node = -1;
 
             $self->{targeting}{SYS}[0]{KEY} = $target;
-            $self->setAttribute( $target, "AFFINITY_PATH", "affinity:sys-0" );
-            $self->setAttribute( $target, "PHYS_PATH",     "physical:sys-0" );
+            $self->setAttribute($target, "AFFINITY_PATH", "affinity:sys-0");
+            $self->setAttribute($target, "PHYS_PATH",     "physical:sys-0");
 
         }
-        if ( $type eq "NODE" )
+        elsif ($type eq "NODE")
         {
-            $proc      = -1;
-            $dimm_tpos = 0;
+            $proc = -1;
+            $self->{dimm_tpos} = 0;
             $node++;
             $node_phys = "physical:sys-0/node-$node";
             $node_aff  = "affinity:sys-0/node-$node";
             $self->{targeting}{SYS}[0]{NODES}[$node]{KEY} = $target;
-            $self->setAttribute( $target, "AFFINITY_PATH",
-                "affinity:sys-0/node-$node" );
-            $self->setAttribute( $target, "PHYS_PATH",
-                "physical:sys-0/node-$node" );
-            $self->setHuid( $target, 0, $node );
+            $self->setAttribute($target, "AFFINITY_PATH",
+                "affinity:sys-0/node-$node");
+            $self->setAttribute($target, "PHYS_PATH",
+                "physical:sys-0/node-$node");
+            $self->setHuid($target, 0, $node);
         }
-        if ( $type eq "PROC" )
+        elsif ($type eq "PROC")
         {
             $proc++;
+            my $num_mcs = 0;
+            ### count number of MCSs
+            foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
+            {
+                my $unit_type = $self->getType($unit);
+                if ($unit_type eq "MCS")
+                {
+                    $num_mcs++;
+                }
+            }
+            if ($num_mcs > $self->{MAX_MCS})
+            {
+                $self->{MAX_MCS} = $num_mcs;
+            }
             $self->{NUM_PROCS_PER_NODE} = $proc + 1;
             $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY} =
               $target;
             ### Don't know how to determine master
             ### proc so I'll choose p0 for now
-            if ( $proc == 0 )
+            if ($proc == 0)
             {
                 $self->{master_proc} = $target;
             }
-            $self->setHuid( $target, 0, $node );
+            $self->setHuid($target, 0, $node);
             my $parent_affinity = "affinity:sys-0/node-$node/proc-$proc";
             my $parent_physical = "physical:sys-0/node-$node/proc-$proc";
-            $self->setAttribute( $target, "AFFINITY_PATH",  $parent_affinity );
-            $self->setAttribute( $target, "PHYS_PATH",      $parent_physical );
-            $self->setAttribute( $target, "POSITION",       $proc );
-            $self->setAttribute( $target, "FABRIC_NODE_ID", $node );
-            $self->setAttribute( $target, "FABRIC_CHIP_ID", $proc );
-            $self->setAttribute( $target, "VPD_REC_NUM",    $proc );
-
-            foreach
-              my $unit ( @{ $self->{data}->{TARGETS}{$target}{CHILDREN} } )
+            $self->setAttribute($target, "AFFINITY_PATH",  $parent_affinity);
+            $self->setAttribute($target, "PHYS_PATH",      $parent_physical);
+            $self->setAttribute($target, "POSITION",       $proc);
+            $self->setAttribute($target, "FABRIC_NODE_ID", $node);
+            $self->setAttribute($target, "FABRIC_CHIP_ID", $proc);
+            $self->setAttribute($target, "VPD_REC_NUM",    $proc);
+            
+            
+            foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
             {
                 my $unit_ptr     = $self->getTarget($unit);
                 my $unit_type    = $self->getType($unit);
-                my $unit_type_id = $self->getEnumValue( "TYPE", $unit_type );
+                my $unit_type_id = $self->getEnumValue("TYPE", $unit_type);
                 if (   $unit_type_id eq ""
                     || $unit_type eq "FSI"
-                    || $unit_type eq "MCS" )
+                    || $unit_type eq "MCS")
                 {
                     $unit_type_id = 0;
                 }
 
                 ## don't want non-hostboot targets
-                if ( $unit_type_id > 0 )
+                if ($unit_type_id > 0)
                 {
                     push(
                         @{
@@ -435,13 +442,12 @@ sub buildAffinity
                     my $physical_path =
                         $parent_physical . "/"
                       . $self->getTarget($unit)->{TARGET}->{instance_name};
-                    $self->setAttribute( $unit, "AFFINITY_PATH",
-                        $affinity_path );
-                    $self->setAttribute( $unit, "PHYS_PATH", $physical_path );
-                    $self->setHuid( $unit, 0, $node );
+                    $self->setAttribute($unit, "AFFINITY_PATH",$affinity_path);
+                    $self->setAttribute($unit, "PHYS_PATH", $physical_path);
+                    $self->setHuid($unit, 0, $node);
 
                     ## export core
-                    if ( $unit_type eq "EX" )
+                    if ($unit_type eq "EX")
                     {
                         my $core_unit =
                           $self->{data}->{TARGETS}{$unit}{CHILDREN}[0];
@@ -460,152 +466,137 @@ sub buildAffinity
                             $physical_path . "/"
                           . $self->getTarget($core_unit)->{TARGET}
                           ->{instance_name};
-                        $self->setAttribute( $core_unit, "AFFINITY_PATH",
-                            $core_affinity_path );
-                        $self->setAttribute( $core_unit, "PHYS_PATH",
-                            $core_physical_path );
-                        $self->setHuid( $core_unit, 0, $node );
+                        $self->setAttribute($core_unit, "AFFINITY_PATH",
+                            $core_affinity_path);
+                        $self->setAttribute($core_unit, "PHYS_PATH",
+                            $core_physical_path);
+                        $self->setHuid($core_unit, 0, $node);
                     }
                 }
-                if ( $unit_type eq "MCS" )
+                elsif ($unit_type eq "MCS")
                 {
-                    my $mcs = $self->getAttribute( $unit, "CHIP_UNIT" );
-                    my $membufnum = $proc * $self->{MAX_MCS} + $mcs;
-                    $self->setAttribute( $unit, "AFFINITY_PATH",
-                        $parent_affinity . "/mcs-$mcs" );
-                    $self->setAttribute( $unit, "PHYS_PATH",
-                        $parent_physical . "/mcs-$mcs" );
-                    $self->setAttribute( $unit, "MCS_NUM", $mcs );
-                    $self->setHuid( $unit, 0, $node );
-                    $self->{targeting}
-                      ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{KEY} =
-                      $unit;
+                    $self->processMcs($unit, $node, $proc, $parent_affinity,
+                        $parent_physical, $node_phys);
+                }
+                
+            }
+        }
+    }
+}
 
-                    ## Find connected membufs
-                    my $membuf_dmi =
-                      $self->{data}->{TARGETS}{$unit}{CONNECTION}{DEST}[0];
-                    if ( defined($membuf_dmi) )
+sub processMcs
+{
+    my $self            = shift;
+    my $unit            = shift;
+    my $node            = shift;
+    my $proc            = shift;
+    my $parent_affinity = shift;
+    my $parent_physical = shift;
+    my $node_phys       = shift;
+
+    my $mcs = $self->getAttribute($unit, "CHIP_UNIT");
+    my $membufnum = $proc * $self->{MAX_MCS} + $mcs;
+    $self->setAttribute($unit, "AFFINITY_PATH",$parent_affinity . "/mcs-$mcs");
+    $self->setAttribute($unit, "PHYS_PATH", $parent_physical . "/mcs-$mcs");
+    $self->setAttribute($unit, "MCS_NUM",   $mcs);
+    $self->setHuid($unit, 0, $node);
+    $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{KEY} =
+      $unit;
+
+    ## Find connected membufs
+    my $membuf_dmi = $self->{data}->{TARGETS}{$unit}{CONNECTION}{DEST}[0];
+    if (defined($membuf_dmi))
+    {
+        ## found membuf connected
+        my $membuf =
+          $self->{data}->{TARGETS}{$membuf_dmi}
+          {PARENT};    ## get parent of dmi unit which is membuf
+        my $dmi_bus = $self->{data}->{TARGETS}{$unit}{CONNECTION}{BUS}[0];
+        $self->setAttribute($membuf, "POSITION",$membufnum);       
+        $self->setAttribute($membuf, "AFFINITY_PATH",
+            $parent_affinity . "/mcs-$mcs/membuf-$membufnum");
+        $self->setAttribute($membuf, "PHYS_PATH",
+            $node_phys . "/membuf-$membufnum");
+        $self->setAttribute($membuf, "VPD_REC_NUM",
+            $self->getAttribute($membuf, "POSITION"));
+        ## copy DMI bus attributes to membuf
+        $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE",
+            $dmi_bus->{bus_attribute}->{DMI_REFCLOCK_SWIZZLE}->{default});
+        $self->setAttribute($unit, "EI_BUS_TX_LANE_INVERT",
+            $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}->{default});
+        $self->setAttribute($unit, "EI_BUS_TX_MSBSWAP",
+            $dmi_bus->{bus_attribute}->{PROC_TX_MSBSWAP}->{default});
+        $self->setAttribute($membuf, "EI_BUS_TX_LANE_INVERT",
+            $dmi_bus->{bus_attribute}->{MEMBUF_TX_LANE_INVERT}->{default});
+        $self->setAttribute($membuf, "EI_BUS_TX_MSBSWAP",
+            $dmi_bus->{bus_attribute}->{MEMBUF_TX_MSBSWAP}->{default});
+
+        $self->setHuid($membuf, 0, $node);
+        $self->{targeting}
+          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs] {MEMBUFS}[0]{KEY} =
+          $membuf;
+
+        ## get the mbas
+        my $mba = 0;
+        foreach my $child (@{ $self->{data}->{TARGETS}{$membuf}{CHILDREN} })
+        {
+            ## need to not hardcard the subunits
+            if ($self->getType($child) eq "L4")
+            {
+                $self->{targeting}
+                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{MEMBUFS}[0]
+                  {L4S}[0] {KEY} = $child;
+                $self->setAttribute($child, "AFFINITY_PATH",
+                    $parent_affinity . "/mcs-$mcs/membuf-$membufnum/l4-0");
+                $self->setAttribute($child, "PHYS_PATH",
+                    $node_phys . "/membuf-$membufnum/l4-0");
+                $self->setHuid($child, 0, $node);
+            }
+            if ($self->getType($child) eq "MBA")
+            {
+                $self->setAttribute($child, "AFFINITY_PATH",
+                    $parent_affinity . "/mcs-$mcs/membuf-$membufnum/mba-$mba");
+                $self->setAttribute($child, "PHYS_PATH",
+                    $node_phys . "/membuf-$membufnum/mba-$mba");
+                $self->setHuid($child, 0, $node);
+                $self->{targeting}
+                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{MEMBUFS}[0]
+                  {MBAS}[$mba]{KEY} = $child;
+
+                ## Trace the DDR busses to find connected DIMM
+                if (defined($self->{data}->{TARGETS}{$child}{CONNECTION}{DEST}))
+                {
+                    my @dimm_conns =
+                      @{ $self->{data}->{TARGETS}{$child}{CONNECTION}{DEST} };
+                    for (my $d = 0; $d < scalar(@dimm_conns); $d++)
                     {
-                        ## found membuf connected
-                        my $membuf =
-                          $self->{data}->{TARGETS}{$membuf_dmi}
-                          {PARENT};    ## get parent of dmi unit which is membuf
-                        my $dmi_bus =
-                          $self->{data}->{TARGETS}{$unit}{CONNECTION}{BUS}[0];
-                        $self->setAttribute( $membuf, "AFFINITY_PATH",
-                            $parent_affinity . "/mcs-$mcs/membuf-$membufnum" );
-                        $self->setAttribute( $membuf, "PHYS_PATH",
-                            $node_phys . "/membuf-$membufnum" );
-                        $self->setAttribute( $membuf, "VPD_REC_NUM",
-                            $self->getAttribute( $membuf, "POSITION" ) );
-                        ## copy DMI bus attributes to membuf
-                        $self->setAttribute( $unit, "DMI_REFCLOCK_SWIZZLE",
-                            $dmi_bus->{bus_attribute}->{DMI_REFCLOCK_SWIZZLE}
-                              ->{default} );
-                        $self->setAttribute( $unit, "EI_BUS_TX_LANE_INVERT",
-                            $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}
-                              ->{default} );
-                        $self->setAttribute( $unit, "EI_BUS_TX_MSBSWAP",
-                            $dmi_bus->{bus_attribute}->{PROC_TX_MSBSWAP}
-                              ->{default} );
-                        $self->setAttribute( $membuf, "EI_BUS_TX_LANE_INVERT",
-                            $dmi_bus->{bus_attribute}->{MEMBUF_TX_LANE_INVERT}
-                              ->{default} );
-                        $self->setAttribute( $membuf, "EI_BUS_TX_MSBSWAP",
-                            $dmi_bus->{bus_attribute}->{MEMBUF_TX_MSBSWAP}
-                              ->{default} );
+                        my $dimm_ddr       = $dimm_conns[$d];
+                        my $dimm           = $self->getTargetParent($dimm_ddr);
+                        my $dimm_connector = $self->getTargetParent($dimm);
 
-                        $self->setHuid( $membuf, 0, $node );
-                        $self->{targeting}
-                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]
-                          {MEMBUFS}[0]{KEY} = $membuf;
+                        #my $dimm_offset = sprintf("%d",$dimm_tpos/8);
+                        #my $affinitypos = ($dimm_offset*4) + $d;
 
-                        ## get the mbas
-                        my $mba = 0;
-                        foreach my $child (
-                            @{ $self->{data}->{TARGETS}{$membuf}{CHILDREN} } )
-                        {
-                            ## need to not hardcard the subunits
-                            if ( $self->getType($child) eq "L4" )
-                            {
-                                $self->{targeting}
-                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}
-                                  [$mcs]{MEMBUFS}[0]{L4S}[0] {KEY} = $child;
-                                $self->setAttribute( $child, "AFFINITY_PATH",
-                                    $parent_affinity
-                                      . "/mcs-$mcs/membuf-$membufnum/l4-0" );
-                                $self->setAttribute( $child, "PHYS_PATH",
-                                    $node_phys . "/membuf-$membufnum/l4-0" );
-                                $self->setHuid( $child, 0, $node );
-                            }
-                            if ( $self->getType($child) eq "MBA" )
-                            {
-                                $self->setAttribute( $child, "AFFINITY_PATH",
-                                    $parent_affinity
-                                      . "/mcs-$mcs/membuf-$membufnum/mba-$mba"
-                                );
-                                $self->setAttribute( $child, "PHYS_PATH",
-                                    $node_phys
-                                      . "/membuf-$membufnum/mba-$mba" );
-                                $self->setHuid( $child, 0, $node );
-                                $self->{targeting}
-                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}
-                                  [$mcs]{MEMBUFS}[0]{MBAS}[$mba]{KEY} = $child;
+                        my $affinitypos = $d;
 
-                                ## Trace the DDR busses to find connected DIMM
-                                if (
-                                    defined(
-                                        $self->{data}
-                                          ->{TARGETS}{$child}{CONNECTION}{DEST}
-                                    )
-                                  )
-                                {
-                                    my @dimm_conns =
-                                      @{ $self->{data}
-                                          ->{TARGETS}{$child}{CONNECTION}
-                                          {DEST} };
-                                    for (
-                                        my $d = 0 ;
-                                        $d < scalar(@dimm_conns) ;
-                                        $d++
-                                      )
-                                    {
-                                        my $dimm_ddr = $dimm_conns[$d];
-                                        my $dimm     =
-                                          $self->getTargetParent($dimm_ddr);
-                                        my $dimm_connector =
-                                          $self->getTargetParent($dimm);
-
-                                  #my $dimm_offset = sprintf("%d",$dimm_tpos/8);
-                                  #my $affinitypos = ($dimm_offset*4) + $d;
-
-                                        my $affinitypos = $d;
-
-                                        $self->setAttribute(
-                                            $dimm,
-                                            "AFFINITY_PATH",
-                                            $parent_affinity
+                        $self->setAttribute($dimm, "AFFINITY_PATH",
+                            $parent_affinity
                       . "/mcs-$mcs/membuf-$membufnum/mba-$mba/dimm-$affinitypos"
-                                        );
-                                        $self->setAttribute( $dimm, "PHYS_PATH",
-                                            $node_phys . "/dimm-$dimm_tpos" );
-                                        $self->setAttribute( $dimm, "POSITION",
-                                            $dimm_tpos );
-                                        $self->setAttribute( $dimm,
-                                            "VPD_REC_NUM", $dimm_tpos );
-                                        $self->setHuid( $dimm, 0, $node );
-                                        $self->{targeting}
-                                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]
-                                          {MCSS}[$mcs]{MEMBUFS}[0]{MBAS}[$mba]
-                                          {DIMMS}[$d]{KEY} = $dimm;
-                                        $dimm_tpos++;
-                                    }
-                                }
-                                $mba++;
-                            }
-                        }
+                        );
+                        $self->setAttribute($dimm, "PHYS_PATH",
+                            $node_phys . "/dimm-" . $self->{dimm_tpos});
+                        $self->setAttribute($dimm, "POSITION",
+                            $self->{dimm_tpos});
+                        $self->setAttribute($dimm, "VPD_REC_NUM",
+                            $self->{dimm_tpos});
+                        $self->setHuid($dimm, 0, $node);
+                        $self->{targeting}
+                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MCSS}[$mcs]
+                          {MEMBUFS}[0]{MBAS}[$mba] {DIMMS}[$d]{KEY} = $dimm;
+                        $self->{dimm_tpos}++;
                     }
                 }
+                $mba++;
             }
         }
     }
@@ -642,11 +633,11 @@ sub getNumConnections
     my $self       = shift;
     my $target     = shift;
     my $target_ptr = $self->getTarget($target);
-    if ( !defined( $target_ptr->{CONNECTION}->{DEST} ) )
+    if (!defined($target_ptr->{CONNECTION}->{DEST}))
     {
         return 0;
     }
-    return scalar( @{ $target_ptr->{CONNECTION}->{DEST} } );
+    return scalar(@{ $target_ptr->{CONNECTION}->{DEST} });
 }
 
 ## returns destination target name of first connection
@@ -676,6 +667,7 @@ sub getConnectionDestination
     my $target_ptr = $self->getTarget($target);
     return $target_ptr->{CONNECTION}->{DEST}->[$i];
 }
+
 sub getConnectionBus
 {
     my $self       = shift;
@@ -685,7 +677,7 @@ sub getConnectionBus
     return $target_ptr->{CONNECTION}->{BUS}->[$i];
 }
 
-sub findEndpoint
+sub findFirstEndpoint
 {
     my $self     = shift;
     my $target   = shift;
@@ -693,21 +685,21 @@ sub findEndpoint
     my $end_type = shift;
 
     my $target_children = $self->getTargetChildren($target);
-    if ( $target_children eq "" ) { return ""; }
+    if ($target_children eq "") { return ""; }
 
-    foreach my $child ( @{ $self->getTargetChildren($target) } )
+    foreach my $child (@{ $self->getTargetChildren($target) })
     {
         my $child_bus_type = $self->getBusType($child);
-        if ( $child_bus_type eq $bus_type )
+        if ($child_bus_type eq $bus_type)
         {
-            for ( my $i = 0 ; $i < $self->getNumConnections($child) ; $i++ )
+            for (my $i = 0; $i < $self->getNumConnections($child); $i++)
             {
-                my $dest_target = $self->getConnectionDestination( $child, $i );
+                my $dest_target = $self->getConnectionDestination($child, $i);
                 my $dest_parent = $self->getTargetParent($dest_target);
                 my $type        = $self->getMrwType($dest_parent);
                 my $dest_type   = $self->getType($dest_parent);
-                if ( $type eq "NA" ) { $type = $dest_type; }
-                if ( $type eq $end_type )
+                if ($type eq "NA") { $type = $dest_type; }
+                if ($type eq $end_type)
                 {
                     return $dest_parent;
                 }
@@ -716,14 +708,55 @@ sub findEndpoint
     }
     return "";
 }
+sub findConnections
+{
+    my $self     = shift;
+    my $target   = shift;
+    my $bus_type = shift;
+    my $end_type = shift;
+    
+    my %connections;
+    my $num=0;
+    my $target_children = $self->getTargetChildren($target);
+    if ($target_children eq "") { return ""; }
+
+    foreach my $child (@{ $self->getTargetChildren($target) })
+    {
+        my $child_bus_type = $self->getBusType($child);
+        if ($child_bus_type eq $bus_type)
+        {
+            for (my $i = 0; $i < $self->getNumConnections($child); $i++)
+            {
+                my $dest_target = $self->getConnectionDestination($child, $i);
+                my $dest_parent = $self->getTargetParent($dest_target);
+                my $type        = $self->getMrwType($dest_parent);
+                my $dest_type   = $self->getType($dest_parent);
+                if ($type eq "NA") { $type = $dest_type; }
+                
+                if ($type eq $end_type)
+                {
+                    $connections{CONN}[$num]{SOURCE}=$child;
+                    $connections{CONN}[$num]{SOURCE_PARENT}=$target;
+                    $connections{CONN}[$num]{DEST}=$dest_target;
+                    $connections{CONN}[$num]{DEST_PARENT}=$dest_parent;
+                    $connections{CONN}[$num]{BUS_NUM}=$i;
+                    $num++;
+                }
+            }
+        }
+    }
+    if ($num==0) { return ""; }
+    return \%connections;
+}
+
 
 ## returns BUS_TYPE attribute of target
 sub getBusType
 {
     my $self   = shift;
     my $target = shift;
-    my $type   = $self->getAttribute( $target, "BUS_TYPE" );
-    if ( $type eq "" ) { $type = "NA"; }
+    my $type   = $self->getAttribute($target, "BUS_TYPE");
+    if ($type eq "") { $type = "NA"; }
     return $type;
 }
 
@@ -732,8 +765,8 @@ sub getType
 {
     my $self   = shift;
     my $target = shift;
-    my $type   = $self->getAttribute( $target, "TYPE" );
-    if ( $type eq "" ) { $type = "NA"; }
+    my $type   = $self->getAttribute($target, "TYPE");
+    if ($type eq "") { $type = "NA"; }
     return $type;
 }
 
@@ -742,8 +775,8 @@ sub getMrwType
 {
     my $self   = shift;
     my $target = shift;
-    my $type   = $self->getAttribute( $target, "MRW_TYPE" );
-    if ( $type eq "" ) { $type = "NA"; }
+    my $type   = $self->getAttribute($target, "MRW_TYPE");
+    if ($type eq "") { $type = "NA"; }
     return $type;
 }
 
@@ -774,19 +807,19 @@ sub isBadAttribute
     my $attribute  = shift;
     my $badvalue   = shift;
     my $target_ptr = $self->getTarget($target);
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$attribute} ) )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}))
     {
         return 1;
     }
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$attribute}->{default} ) )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}->{default}))
     {
         return 1;
     }
-    if ( $target_ptr->{ATTRIBUTES}->{$attribute}->{default} eq "" )
+    if ($target_ptr->{ATTRIBUTES}->{$attribute}->{default} eq "")
     {
         return 1;
     }
-    if ( $target_ptr->{ATTRIBUTES}->{$attribute}->{default} eq $badvalue )
+    if ($target_ptr->{ATTRIBUTES}->{$attribute}->{default} eq $badvalue)
     {
         return 1;
     }
@@ -804,26 +837,25 @@ sub isBadComplexAttribute
     my $badvalue   = shift;
     my $target_ptr = $self->getTarget($target);
 
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$attribute} ) )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}))
     {
         return 1;
     }
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$attribute}->{default} ) )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}->{default}))
     {
         return 1;
     }
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$attribute}->{default}->{field} )
-      )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}->{default}->{field}))
     {
         return 1;
     }
-    if ( $target_ptr->{ATTRIBUTES}->{$attribute}->{default}->{field}->{$field}
-        ->{value} eq "" )
+    if ($target_ptr->{ATTRIBUTES}->{$attribute}->{default}->{field}->{$field}
+        ->{value} eq "")
     {
         return 1;
     }
-    if ( $target_ptr->{ATTRIBUTES}->{$attribute}->{default}->{field}->{$field}
-        ->{value} eq $badvalue )
+    if ($target_ptr->{ATTRIBUTES}->{$attribute}->{default}->{field}->{$field}
+        ->{value} eq $badvalue)
     {
         return 1;
     }
@@ -837,10 +869,10 @@ sub getAttribute
     my $target     = shift;
     my $attribute  = shift;
     my $target_ptr = $self->getTarget($target);
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$attribute}->{default} ) )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}->{default}))
     {
-        printf( "ERROR: getAttribute(%s,%s) | Attribute not defined\n",
-            $target, $attribute );
+        printf("ERROR: getAttribute(%s,%s) | Attribute not defined\n",
+            $target, $attribute);
 
         #print Dumper($target_ptr);
         $self->myExit(4);
@@ -855,14 +887,14 @@ sub renameAttribute
     my $oldName    = shift;
     my $newName    = shift;
     my $target_ptr = $self->{data}->{TARGETS}->{$target};
-    if ( !defined( $target_ptr->{ATTRIBUTES}->{$oldName} ) )
+    if (!defined($target_ptr->{ATTRIBUTES}->{$oldName}))
     {
         return 1;
     }
     $target_ptr->{ATTRIBUTES}->{$newName}->{default} =
       $target_ptr->{ATTRIBUTES}->{$oldName}->{default};
-    delete( $target_ptr->{ATTRIBUTES}->{$oldName} );
-    $self->log( $target, "Renaming attribute: $oldName => $newName" );
+    delete($target_ptr->{ATTRIBUTES}->{$oldName});
+    $self->log($target, "Renaming attribute: $oldName => $newName");
     return 0;
 }
 ## sets an attribute
@@ -874,7 +906,7 @@ sub setAttribute
     my $value      = shift;
     my $target_ptr = $self->getTarget($target);
     $target_ptr->{ATTRIBUTES}->{$attribute}->{default} = $value;
-    $self->log( $target, "Setting Attribute: $attribute=$value" );
+    $self->log($target, "Setting Attribute: $attribute=$value");
 }
 ## sets the field of a complex attribute
 sub setAttributeField
@@ -903,9 +935,13 @@ sub getBusAttribute
         )
       )
     {
-        printf( "ERROR: getBusAttribute(%s,%d,%s) | Attribute not defined\n",
-            $target, $busnum, $attr );
+        printf("ERROR: getBusAttribute(%s,%d,%s) | Attribute not defined\n",
+            $target, $busnum, $attr);
         $self->myExit(4);
+    }
+    if (ref($target_ptr->{CONNECTION}->{BUS}->[$busnum]->{bus_attribute}->{$attr}
+      ->{default}) eq  "HASH") {
+        return  "";     
     }
     return $target_ptr->{CONNECTION}->{BUS}->[$busnum]->{bus_attribute}->{$attr}
       ->{default};
@@ -925,10 +961,10 @@ sub getEnumValue
     my $self     = shift;
     my $enumType = shift;
     my $enumName = shift;
-    if ( !defined( $self->{enumeration}->{$enumType}->{$enumName} ) )
+    if (!defined($self->{enumeration}->{$enumType}->{$enumName}))
     {
-        printf( "ERROR: getEnumValue(%s,%s) | enumType not defined\n",
-            $enumType, $enumName );
+        printf("ERROR: getEnumValue(%s,%s) | enumType not defined\n",
+            $enumType, $enumName);
         $self->myExit(4);
     }
     return $self->{enumeration}->{$enumType}->{$enumName};
@@ -943,23 +979,23 @@ sub setHuid
 
     my $type    = $self->getType($target);
     my $type_id = $self->{enumeration}->{TYPE}->{$type};
-    if ( $type_id eq "" ) { $type_id = 0; }
-    if ( $type_id == 0 ) { return; }
+    if ($type_id eq "") { $type_id = 0; }
+    if ($type_id == 0) { return; }
     my $index = 0;
-    if ( defined( $self->{huid_idx}->{$type} ) )
+    if (defined($self->{huid_idx}->{$type}))
     {
         $index = $self->{huid_idx}->{$type};
     }
     else { $self->{huid_idx}->{$type} = 0; }
 
     # Format: SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
-    my $huid = sprintf( "%01x%01x%02x%04x", $sys, $node, $type_id, $index );
+    my $huid = sprintf("%01x%01x%02x%04x", $sys, $node, $type_id, $index);
     $huid = "0x" . uc($huid);
 
-    $self->setAttribute( $target, "HUID", $huid );
+    $self->setAttribute($target, "HUID", $huid);
     $self->{huid_idx}->{$type}++;
-    $self->log( $target, "Setting HUID: $huid" );
-    $self->setMruid( $target, $node );
+    $self->log($target, "Setting HUID: $huid");
+    $self->setMruid($target, $node);
 }
 
 sub setMruid
@@ -970,17 +1006,17 @@ sub setMruid
 
     my $type          = $self->getType($target);
     my $mru_prefix_id = $self->{enumeration}->{MRU_PREFIX}->{$type};
-    if ( $mru_prefix_id eq "" ) { $mru_prefix_id = "0xFFFF"; }
-    if ( $mru_prefix_id eq "0xFFFF" ) { return; }
+    if ($mru_prefix_id eq "") { $mru_prefix_id = "0xFFFF"; }
+    if ($mru_prefix_id eq "0xFFFF") { return; }
     my $index = 0;
-    if ( defined( $self->{mru_idx}->{$node}->{$type} ) )
+    if (defined($self->{mru_idx}->{$node}->{$type}))
     {
         $index = $self->{mru_idx}->{$node}->{$type};
     }
     else { $self->{mru_idx}->{$node}->{$type} = 0; }
 
-    my $mruid = sprintf( "%s%04x", $mru_prefix_id, $index );
-    $self->setAttribute( $target, "MRU_ID", $mruid );
+    my $mruid = sprintf("%s%04x", $mru_prefix_id, $index);
+    $self->setAttribute($target, "MRU_ID", $mruid);
     $self->{mru_idx}->{$node}->{$type}++;
 }
 
@@ -990,13 +1026,19 @@ sub getMasterProc
     return $self->{master_proc};
 }
 
+sub getSystemName
+{
+    my $self = shift;
+    return $self->getAttribute("/".$self->{TOP_LEVEL}, "SYSTEM_NAME");
+}
+
 sub myExit
 {
     my $self      = shift;
     my $exit_code = shift;
-    if ( $exit_code eq "" ) { $exit_code = 0; }
+    if ($exit_code eq "") { $exit_code = 0; }
     $self->{errorsExist} = 1;
-    if ( $self->{force} == 0 )
+    if ($self->{force} == 0)
     {
         exit($exit_code);
     }
@@ -1007,7 +1049,7 @@ sub log
     my $self   = shift;
     my $target = shift;
     my $msg    = shift;
-    if ( $self->{debug} )
+    if ($self->{debug})
     {
         print "DEBUG: ($target) $msg\n";
     }
@@ -1212,3 +1254,4 @@ Prints to stdout log message is debug mode is turned on.
 Norman James <njames@us.ibm.com>
 
 =cut
+

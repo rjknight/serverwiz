@@ -14,9 +14,8 @@ public class Attribute implements java.io.Serializable {
 	public String desc = "";
 	public Boolean readable = false;
 	public Boolean writeable = false;
-	public Boolean priority = false;
-	public Boolean connectivity = false;
 	public Persistency persistency = Persistency.NO_PERSISTENCY;
+	public Boolean hide = false;
 
 	public enum Persistency {
 		NO_PERSISTENCY, VOLATILE_ZEROED, NON_VOLATILE, VOLATILE
@@ -28,12 +27,11 @@ public class Attribute implements java.io.Serializable {
 	public Attribute(Attribute a) {
 		this.name = a.name;
 		this.desc = a.desc;
-		this.priority=a.priority;
-		this.connectivity=a.connectivity;
 		this.persistency = a.persistency;
 		this.readable = a.readable;
 		this.writeable = a.writeable;
 		this.inherited = a.inherited;
+		this.hide = a.hide;
 		
 		if (a.value instanceof AttributeValueComplex) {
 			this.value = new AttributeValueComplex((AttributeValueComplex)a.value);
@@ -100,11 +98,8 @@ public class Attribute implements java.io.Serializable {
 		if (SystemModel.isElementDefined(attribute,"writeable")) {
 			writeable=true;
 		}
-		if (SystemModel.isElementDefined(attribute,"priority")) {
-			priority=true;
-		}
-		if (SystemModel.isElementDefined(attribute,"connectivity")) {
-			connectivity=true;
+		if (SystemModel.isElementDefined(attribute,"serverwizHide")) {
+			hide=true;
 		}
 		Node simpleType = attribute.getElementsByTagName("simpleType").item(0);
 		if (simpleType!=null) { 

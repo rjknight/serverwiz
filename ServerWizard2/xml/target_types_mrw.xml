@@ -800,6 +800,72 @@
 			<id>PM_WINKLE_TYPE</id>
 			<default>0x0</default>
 		</attribute>
+		<attribute>
+			<id>EEPROM_SBE_BACKUP_INFO</id>
+			<default>
+				<field><id>byteAddrOffset</id><value>0x02</value></field>
+				<field><id>devAddr</id><value>0xA2</value></field>
+				<field><id>engine</id><value>0</value></field>
+				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
+				<field><id>port</id><value>1</value></field>
+				<field><id>writeCycleTime</id><value>0x05</value></field>
+				<field><id>writePageSize</id><value>0x80</value></field>
+			</default>
+		</attribute>
+		<attribute>
+			<id>EEPROM_SBE_PRIMARY_INFO</id>
+			<default>
+				<field><id>byteAddrOffset</id><value>0x02</value></field>
+				<field><id>devAddr</id><value>0xA2</value></field>
+				<field><id>engine</id><value>0</value></field>
+				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
+				<field><id>port</id><value>0</value></field>
+				<field><id>writeCycleTime</id><value>0x05</value></field>
+				<field><id>writePageSize</id><value>0x80</value></field>
+			</default>
+		</attribute>
+		<attribute>
+			<id>EEPROM_VPD_BACKUP_INFO</id>
+			<default>
+				<field><id>byteAddrOffset</id><value>0x02</value></field>
+				<field><id>devAddr</id><value>0xA0</value></field>
+				<field><id>engine</id><value>0</value></field>
+				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
+				<field><id>port</id><value>1</value></field>
+				<field><id>writeCycleTime</id><value>0x05</value></field>
+				<field><id>writePageSize</id><value>0x80</value></field>
+			</default>
+		</attribute>
+		<attribute>
+			<id>EEPROM_VPD_FRU_INFO</id>
+			<default>
+				<field><id>byteAddrOffset</id><value>0x02</value></field>
+				<field><id>devAddr</id><value>0xA0</value></field>
+				<field><id>engine</id><value>0</value></field>
+				<field><id>fruId</id><value>0++</value></field>
+				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
+				<field><id>port</id><value>0</value></field>
+				<field><id>writeCycleTime</id><value>0x05</value></field>
+				<field><id>writePageSize</id><value>0x80</value></field>
+			</default>
+		</attribute>
+		<attribute>
+			<id>EEPROM_VPD_PRIMARY_INFO</id>
+			<default>
+				<field><id>byteAddrOffset</id><value>0x02</value></field>
+				<field><id>devAddr</id><value>0xA0</value></field>
+				<field><id>engine</id><value>0</value></field>
+				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
+				<field><id>port</id><value>0</value></field>
+				<field><id>writeCycleTime</id><value>0x05</value></field>
+				<field><id>writePageSize</id><value>0x80</value></field>
+			</default>
+		</attribute>		
 	</targetType>
 	<targetType>
 		<id>unit-ex-power8</id>
@@ -1258,6 +1324,10 @@
 		</attribute>
 		<attribute>
 			<id>TYPE</id>
+			<default>NA</default>
+		</attribute>
+		<attribute>
+			<id>MRW_TYPE</id>
 			<default>NA</default>
 		</attribute>
 		<attribute>
@@ -1753,7 +1823,7 @@
 	</targetType>
 	<targetType>
 		<id>chip-vpd-device</id>
-		<parent>i2c-device</parent>
+		<parent>chip</parent>
 		<parent_type>card-motherboard</parent_type>
 		<parent_type>card-daughtercard</parent_type>
 		<attribute>
@@ -1769,6 +1839,10 @@
 		<attribute>
 			<id>TYPE</id>
 			<default>NA</default>
+		</attribute>
+		<attribute>
+			<id>MRW_TYPE</id>
+			<default>VPD</default>
 		</attribute>
 	</targetType>
 	<targetType>
@@ -1983,6 +2057,33 @@
 		<attribute>
 			<id>CLASS</id>
 			<default>BUS</default>
+		</attribute>
+	</targetType>
+	<targetType>
+		<id>LOGICAL_ASSOCIATION</id>
+		<attribute>
+			<id>CLASS</id>
+			<default>BUS</default>
+		</attribute>
+	</targetType>
+	<targetType>
+		<id>unit-logic_assoc-generic</id>
+		<parent>unit</parent>
+		<attribute>
+			<id>TYPE</id>
+			<default>NA</default>
+		</attribute>
+		<attribute>
+			<id>BUS_TYPE</id>
+			<default>LOGICAL_ASSOCIATION</default>
+		</attribute>
+		<attribute>
+			<id>DIRECTION</id>
+			<default>INOUT</default>
+		</attribute>
+		<attribute>
+			<id>ASSOCIATION_TYPE</id>
+			<default>NA</default>
 		</attribute>
 	</targetType>
 
