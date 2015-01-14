@@ -1,5 +1,6 @@
 package com.ibm.ServerWizard2;
 
+import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -50,8 +51,6 @@ public class MainDialog extends Dialog {
 	private Combo combo;
 	private Combo comboSource;
 	private Combo comboDest;
-	private Boolean priority = false;
-	private Boolean connectivity = false;
 	Composite container;
 
 	TargetWizardController controller;
@@ -92,7 +91,7 @@ public class MainDialog extends Dialog {
 	 */
 	public MainDialog(Shell parentShell) {
 		super(parentShell);
-		setShellStyle(SWT.BORDER | SWT.CLOSE | SWT.MIN | SWT.MAX | SWT.RESIZE);
+		setShellStyle(SWT.BORDER | SWT.MIN | SWT.MAX | SWT.RESIZE | SWT.APPLICATION_MODAL);
 	}
 
 	protected void configureShell(Shell newShell) {
@@ -493,19 +492,31 @@ public class MainDialog extends Dialog {
 		
 		Button btnSpacer = createButton (parent, IDialogConstants.NO_ID, "Spacer", false) ;
 		btnSpacer.setVisible(false);
+
+		Button btnForceUpdate = createButton (parent, IDialogConstants.NO_ID, "Force Update", false) ;
+		btnForceUpdate.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		btnForceUpdate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String workingDir = LibraryManager.getWorkingDir();
+				String updateFilename = workingDir + "serverwiz2.update";
+				File updateFile = new File(updateFilename);
+				if (updateFile.delete()) {
+					MessageDialog.openInformation(null, "Force Update","Update will occur upon restart...");
+					ServerWizard2.LOGGER.info("Removing update file to force update upon restart.");
+				} else {
+					MessageDialog.openError(null, "Error","Unable to delete serverwiz2.update.  Try deleting manually.");
+					ServerWizard2.LOGGER.severe("Unable to delete serverwiz2.update.");					
+				}
+			}
+		});		
+
 		
 		Button btnExit = createButton (parent, IDialogConstants.CLOSE_ID, "Exit", false) ;
 		btnExit.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnExit.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (dirty) {
-					if (!MessageDialog.openConfirm(null, "Save Resource", mrwFilename
-							+ "has been modified. Ignore changes?")) {
-						return;
-					}
-					ServerWizard2.LOGGER.info("Discarding changes and exiting...");
-				}
+			public void widgetSelected(SelectionEvent e) {			
 				Button b = (Button) e.getSource();
 				b.getShell().close();
 			}
@@ -946,6 +957,13 @@ public class MainDialog extends Dialog {
 	@Override
 	public boolean close() {
 		// this.clearTreeAll();
+		if (dirty) {
+			if (!MessageDialog.openConfirm(null, "Save Resource", mrwFilename
+					+ "has been modified. Ignore changes?")) {
+				return false;
+			}
+			ServerWizard2.LOGGER.info("Discarding changes and exiting...");
+		}
 		this.clearTable();
 		for (Control c : container.getChildren()) {
 			c.dispose();
@@ -1004,4 +1022,5 @@ public class MainDialog extends Dialog {
 		this.btnSaveXml.setEnabled(true);
 		this.getShell().setText("ServerWiz2 - " + this.mrwFilename);
 	}
+
 }
