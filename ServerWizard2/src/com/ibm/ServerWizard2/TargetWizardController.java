@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -136,7 +137,55 @@ public class TargetWizardController {
 		}
 		view.refreshTree(model.rootTarget, null);
 	}
+	public void importSDR(String filename) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		
+		Vector<SdrRecord> sdrs = new Vector<SdrRecord>();
+		try {
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			builder.setErrorHandler(new XmlHandler());
 
+			Document document = builder.parse(filename);
+
+			NodeList deviceList = document
+					.getElementsByTagName("device");
+
+			for (int i = 0; i < deviceList.getLength(); ++i) {
+				Element deviceElement = (Element) deviceList.item(i);
+				SdrRecord s = new SdrRecord();
+				s.readXML(deviceElement);
+				model.updateTargetSdr(s);
+				sdrs.add(s);
+			}
+		} catch (Exception e) {
+			MessageDialog.openError(null, "SDR Import Error", e.getMessage());
+			e.printStackTrace();
+		}
+		
+		HashMap<Target,Vector<String>> ipmiAttr = new HashMap<Target,Vector<String>>();
+		for (SdrRecord sdr : sdrs){
+			Target t = sdr.getTarget();
+			Vector<String> ipmiSensors = ipmiAttr.get(t);
+			if (ipmiSensors==null) {
+				ipmiSensors = new Vector<String>();
+				ipmiAttr.put(t, ipmiSensors);
+			}
+			ipmiSensors.add(String.format("0x%02x", sdr.getEntityId())+","+
+					String.format("0x%02x", sdr.getSensorId()));
+		}
+		for (Map.Entry<Target, Vector<String>> entry : ipmiAttr.entrySet()) {
+			Target t=entry.getKey();
+			String ipmiStr = "";
+			Vector<String> attrs = entry.getValue();
+			for (String a : attrs) {
+				ipmiStr = ipmiStr+a+",";
+			}
+			for (int i=attrs.size();i<16;i++) {
+				ipmiStr = ipmiStr+"0xFF,0xFF,";
+			}
+			t.setAttributeValue("IPMI_SENSORS", ipmiStr);
+		}
+	}
 	public void loadAttributes(String filename) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		HashMap<String, Vector<Attribute>> loadedAttributes = new HashMap<String, Vector<Attribute>>();

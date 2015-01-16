@@ -32,8 +32,39 @@ public class SystemModel {
 	private Vector<Target> targetList = new Vector<Target>();
 	public HashMap<String, Vector<Target>> childTargetTypes = new HashMap<String, Vector<Target>>();
 	private Vector<Target> busTypes = new Vector<Target>();
-
-
+	
+		public void updateTargetSdr(SdrRecord sdr) throws Exception {
+		//Find target that matches sdr entity id and entity instance
+		ServerWizard2.LOGGER.info("Looking for matching target: "+sdr.toString());
+		Boolean imported=false;
+		for (Target target : targetList) {
+			String strEntityId=target.getAttribute("ENTITY_ID");
+			int entityInst=target.getPosition();
+			if (!strEntityId.isEmpty()) {
+				String ids[] = strEntityId.split(",");
+				for (int i=0;i<ids.length;i++) {
+					String idEnum=getEnumValue("ENTITY_ID",ids[i]);
+					if (idEnum==null) {
+						String msg=ids[i]+" is invalid for target: "+target.getName();
+						ServerWizard2.LOGGER.severe(msg);
+						throw new Exception(msg);
+					} else {
+						int entityId=Byte.decode(idEnum);
+						if (entityId==sdr.getEntityId() && entityInst==sdr.getEntityInstance()) {
+							ServerWizard2.LOGGER.info("SDRImport: Target="+target.getName()+"; EntityID="+entityId+"; EntityInst="+entityInst);
+							imported=true;
+							sdr.setTarget(target);
+						}
+					}
+				}
+			}
+		}
+		if (!imported) {
+			String msg=sdr.toString()+"was not imported and is a virtual sensor.";
+			ServerWizard2.LOGGER.severe(msg);
+			throw new Exception(msg);
+		}
+	}
 	public void initBusses(Target target) {
 		target.initBusses(busTypes);
 	}

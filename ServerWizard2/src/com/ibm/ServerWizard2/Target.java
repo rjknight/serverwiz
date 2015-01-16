@@ -23,7 +23,7 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 	private TreeMap<Target,Vector<Connection>> busses = new TreeMap<Target,Vector<Connection>>();
 	private Boolean busInited=false;
 	private Boolean hidden = false;
-	//private Boolean staticName=false;
+	
 	
 	public Target() {
 	}
@@ -34,9 +34,7 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 		this.parent = s.parent;
 		this.position = s.position;
 		this.hidden = s.hidden;
-		// this.parentNode = s.parentNode;
 		this.parentType.addAll(s.parentType);
-		//this.staticName=s.staticName;
 		
 		for (Map.Entry<String, Attribute> entry : s.getAttributes().entrySet()) {
 			String key = new String(entry.getKey());
@@ -44,7 +42,6 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 			this.attributes.put(key, value);
 		}
 	}
-	
 	public TreeMap<Target,Vector<Connection>> getBusses() {
 		return busses;
 	}
