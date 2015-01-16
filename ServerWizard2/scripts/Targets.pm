@@ -107,11 +107,7 @@ sub printXML
         my $children = $t->[$p];
         foreach my $u (sort(keys %{$children}))
         {
-            if ($u eq "KEY")
-            {
-
-            }
-            else
+            if ($u ne "KEY")
             {
                 $self->printXML($fh, $t->[$p]->{$u});
             }
@@ -419,8 +415,7 @@ sub buildAffinity
                 my $unit_ptr     = $self->getTarget($unit);
                 my $unit_type    = $self->getType($unit);
                 my $unit_type_id = $self->getEnumValue("TYPE", $unit_type);
-                if (   $unit_type_id eq ""
-                    || $unit_type eq "FSI"
+                if (   $unit_type_id eq "" || $unit_type eq "FSI"
                     || $unit_type eq "MCS")
                 {
                     $unit_type_id = 0;
@@ -429,13 +424,9 @@ sub buildAffinity
                 ## don't want non-hostboot targets
                 if ($unit_type_id > 0)
                 {
-                    push(
-                        @{
-                            $self->{targeting}
-                              ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{$unit_type}
-                          },
-                        { 'KEY' => $unit }
-                    );
+                    push(@{$self->{targeting}
+                            ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{$unit_type}},
+                            { 'KEY' => $unit });
                     my $affinity_path =
                         $parent_affinity . "/"
                       . $self->getTarget($unit)->{TARGET}->{instance_name};
@@ -897,7 +888,32 @@ sub renameAttribute
     $self->log($target, "Renaming attribute: $oldName => $newName");
     return 0;
 }
+
+## copy an attribute between targets
+sub copyAttribute
+{
+    my $self = shift;
+    my $source_target = shift;
+    my $dest_target = shift;
+    my $attribute = shift;
+    
+    my $value=$self->getAttribute($source_target,$attribute);
+    $self->setAttribute($dest_target,$attribute,$value);
+    
+    $self->log($dest_target, "Copy Attribute: $attribute=$value");
+}
+
 ## sets an attribute
+sub setAttribute
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $attribute  = shift;
+    my $value      = shift;
+    my $target_ptr = $self->getTarget($target);
+    $target_ptr->{ATTRIBUTES}->{$attribute}->{default} = $value;
+    $self->log($target, "Setting Attribute: $attribute=$value");
+}
 sub setAttribute
 {
     my $self       = shift;
