@@ -289,6 +289,14 @@
 			<name>SPD</name>
 			<value>5</value>
 		</enumerator>		
+		<enumerator>
+			<name>FSICM</name>
+			<value>6</value>
+		</enumerator>		
+		<enumerator>
+			<name>FSIM</name>
+			<value>7</value>
+		</enumerator>		
 		<default>NA</default>
 	</enumerationType>
 	<enumerationType>
@@ -868,4 +876,42 @@
 		<persistency>non-volatile</persistency>
 		<readable />
 	</attribute>
+	<attribute>
+		<id>MEMORY_SIZE_IN_KB</id>
+		<description>Size of a SEEPROM in KB</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>WRITE_CYCLE_TIME</id>
+		<description>write cycle time of seeprom</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>WRITE_PAGE_SIZE</id>
+		<description>Page Size of a SEEPROM in KB</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	
+	<attribute>
+		<id>BYTE_ADDRESS_OFFSET</id>
+		<description>address offset of seeprom</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+
 </attributes>

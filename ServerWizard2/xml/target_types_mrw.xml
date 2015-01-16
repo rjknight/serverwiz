@@ -16,6 +16,10 @@
 			<default>POWER8</default>
 		</attribute>
 		<attribute>
+			<id>ENTITY_ID</id>
+			<default>SYSTEM_BOARD,OS,BIOS,POWER_UNIT,SYSTEM_CHASSIS</default>
+		</attribute>		
+		<attribute>
 			<id>EXECUTION_PLATFORM</id>
 			<default>1</default>
 		</attribute>
@@ -645,6 +649,10 @@
 			<default></default>
 		</attribute>
 		<attribute>
+			<id>ENTITY_ID</id>
+			<default>PROCESSOR</default>
+		</attribute>		
+		<attribute>
 			<id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
 			<default>0x000018F4,0x000018F4
 			</default>
@@ -743,7 +751,7 @@
 		<attribute>
 			<id>TYPE</id>
 			<default>PROC</default>
-		</attribute>
+		</attribute>			
 		<attribute>
 			<id>PROC_DCM_INSTALLED</id>
 			<default>0</default>
@@ -800,6 +808,38 @@
 			<id>PM_WINKLE_TYPE</id>
 			<default>0x0</default>
 		</attribute>
+		<attribute>
+			<id>FSP_BASE_ADDR</id>
+			<default>0,0x0000000000000000</default>
+		</attribute>
+		<attribute>
+			<id>PSI_BRIDGE_BASE_ADDR</id>
+			<default>0,0x0000000000000000</default>
+		</attribute>
+		<attribute>
+			<id>INTP_BASE_ADDR</id>
+			<default>1,0x0003FFFF80000000,0x400000,0x100000,0</default>
+		</attribute>
+		<attribute>
+			<id>PHB_BASE_ADDRS</id>
+			<default>4,0x0003FFFE40000000,0x1000000,0x400000,0x100000</default>
+		</attribute>
+		<attribute>
+			<id>PCI_BASE_ADDRS_32</id>
+			<default>4,0x0003FF8000000000,0x800000000,0x200000000,0x80000000</default>
+		</attribute>
+		<attribute>
+			<id>PCI_BASE_ADDRS_64</id>
+			<default>4,0x0003D00000000000,0x10000000000,0x4000000000,0x1000000000</default>
+		</attribute>
+		<attribute>
+			<id>RNG_BASE_ADDR</id>
+			<default>1,0x0003FFFF40000000,0x4000,0x1000,0</default>
+		</attribute> 
+		<attribute>
+			<id>IBSCOM_PROC_BASE_ADDR</id>
+			<default>1,0x0003E00000000000,0x40000000000,0x10000000000,0</default>
+		</attribute> 		
 		<attribute>
 			<id>EEPROM_SBE_BACKUP_INFO</id>
 			<default>
@@ -865,7 +905,11 @@
 				<field><id>writeCycleTime</id><value>0x05</value></field>
 				<field><id>writePageSize</id><value>0x80</value></field>
 			</default>
-		</attribute>		
+		</attribute>
+	<attribute>
+		<id>I2C_BUS_SPEED_ARRAY</id>
+		<default>1000,1000,0,0,0,0</default>
+	</attribute>		
 	</targetType>
 	<targetType>
 		<id>unit-ex-power8</id>
@@ -1161,7 +1205,10 @@
 			<id>EI_BUS_TX_MSBSWAP</id>
 			<default>0</default>
 		</attribute>
-
+		<attribute>
+			<id>IBSCOM_MCS_BASE_ADDR</id>
+			<default>0x0003E00000000000,0x40000000000,0x10000000000,0x2000000000</default>
+		</attribute>
 	</targetType>
 
 	<targetType>
@@ -1242,6 +1289,10 @@
 		<attribute>
 			<id>MSS_VOLT_OVERRIDE</id>
 		</attribute>
+	<attribute>
+		<id>I2C_BUS_SPEED_ARRAY</id>
+		<default>400,0,0,0,0,0</default>
+	</attribute>		
 	</targetType>
 
 	<!-- Centaur L4 -->
@@ -1297,7 +1348,10 @@
 		<parent>connector</parent>
 		<parent_type>card-motherboard</parent_type>
 		<parent_type>card-daughtercard</parent_type>
-
+		<attribute>
+			<id>ENTITY_ID</id>
+			<default>MEMORY_DEVICE</default>
+		</attribute>
 		<attribute>
 			<id>MODEL</id>
 			<default>JEDEC</default>
@@ -1312,7 +1366,7 @@
 		<attribute>
 			<id>MODEL</id>
 			<default>JEDEC</default>
-		</attribute>
+		</attribute>	
 	</targetType>
 
 	<targetType>
@@ -1511,6 +1565,10 @@
 			<default>FSI</default>
 		</attribute>
 		<attribute>
+			<id>MRW_TYPE</id>
+			<default>FSICM</default>
+		</attribute>
+		<attribute>
 			<id>FSI_ENGINE</id>
 			<default>0x00</default>
 		</attribute>
@@ -1546,6 +1604,10 @@
 		<attribute>
 			<id>TYPE</id>
 			<default>FSI</default>
+		</attribute>
+		<attribute>
+			<id>MRW_TYPE</id>
+			<default>FSIM</default>
 		</attribute>
 		<attribute>
 			<id>FSI_ENGINE</id>
@@ -1824,8 +1886,6 @@
 	<targetType>
 		<id>chip-vpd-device</id>
 		<parent>chip</parent>
-		<parent_type>card-motherboard</parent_type>
-		<parent_type>card-daughtercard</parent_type>
 		<attribute>
 			<id>VPD_TYPE</id>
 			<default></default>
@@ -1844,7 +1904,104 @@
 			<id>MRW_TYPE</id>
 			<default>VPD</default>
 		</attribute>
+		<attribute>
+			<id>BYTE_ADDRESS_OFFSET</id>
+			<default>2</default>
+		</attribute>		
+		<attribute>
+			<id>MEMORY_SIZE_IN_KB</id>
+			<default></default>
+		</attribute>
+		<attribute>
+			<id>WRITE_CYCLE_TIME</id>
+			<default></default>
+		</attribute>
+		<attribute>
+			<id>WRITE_PAGE_SIZE</id>
+			<default></default>
+		</attribute>
 	</targetType>
+	<targetType>
+		<id>chip-membuf_vpd-device</id>
+		<parent>chip-vpd-device</parent>
+		<parent_type>card-daughtercard</parent_type>
+		<attribute>
+			<id>VPD_TYPE</id>
+			<default>CVPD</default>
+		</attribute>
+		<attribute>
+			<id>BYTE_ADDRESS_OFFSET</id>
+			<default>2</default>
+		</attribute>
+
+		<attribute>
+			<id>MEMORY_SIZE_IN_KB</id>
+			<default>0x40</default>
+		</attribute>
+		<attribute>
+			<id>WRITE_CYCLE_TIME</id>
+			<default>20</default>
+		</attribute>
+		<attribute>
+			<id>WRITE_PAGE_SIZE</id>
+			<default>32</default>
+		</attribute>
+	</targetType>	
+	<targetType>
+		<id>chip-planar_vpd-device</id>
+		<parent>chip-vpd-device</parent>
+		<parent_type>card-motherboard</parent_type>
+		<parent_type>card-daughtercard</parent_type>
+		<attribute>
+			<id>VPD_TYPE</id>
+			<default>CVPD</default>
+		</attribute>
+		<attribute>
+			<id>BYTE_ADDRESS_OFFSET</id>
+			<default>2</default>
+		</attribute>
+		<attribute>
+			<id>MEMORY_SIZE_IN_KB</id>
+			<default>0x40</default>
+		</attribute>
+		<attribute>
+			<id>WRITE_CYCLE_TIME</id>
+			<default>20</default>
+		</attribute>
+		<attribute>
+			<id>WRITE_PAGE_SIZE</id>
+			<default>32</default>
+		</attribute>
+	</targetType>	
+	<targetType>
+		<id>chip-spd-device</id>
+		<parent>chip-vpd-device</parent>
+		<attribute>
+			<id>VPD_TYPE</id>
+			<default>SPD</default>
+		</attribute>
+		<attribute>
+			<id>MRW_TYPE</id>
+			<default>SPD</default>
+		</attribute>		
+		<attribute>
+			<id>BYTE_ADDRESS_OFFSET</id>
+			<default>0x01</default>
+		</attribute>
+		<attribute>
+			<id>MEMORY_SIZE_IN_KB</id>
+			<default>0x01</default>
+		</attribute>
+		<attribute>
+			<id>WRITE_CYCLE_TIME</id>
+			<default>0x05</default>
+		</attribute>
+		<attribute>
+			<id>WRITE_PAGE_SIZE</id>
+			<default>0x00</default>
+		</attribute>
+	</targetType>	
+
 	<targetType>
 		<id>unit-pcie-endpoint</id>
 		<parent>unit</parent>

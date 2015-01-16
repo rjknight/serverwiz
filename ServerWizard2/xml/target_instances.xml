@@ -631,7 +631,7 @@
 		</attribute>
 		<attribute>
 			<attribute_id>FSI_PORT</attribute_id>
-			<value>2</value>
+			<value>6</value>
 		</attribute>
 		<attribute>
 			<attribute_id>FSI_LINK</attribute_id>
@@ -808,6 +808,7 @@
 		<child_id>i2c-spare</child_id>
 		<child_id>fsi-slave-membuf</child_id>
 		<child_id>vddr</child_id>
+		<child_id>vpd_assoc_child</child_id>
 	</target_instance>
 	<target_instance>
 		<id>unit-fsicm-slave</id>
@@ -928,14 +929,22 @@
 		<instance_id>vpdchip</instance_id>
 		<child_id>i2c-slave</child_id>
 	</target_instance>
-
 	<target_instance>
-		<id>chip-vpd-device</id>
+		<id>chip-membuf_vpd-device</id>
+		<instance_id>vpdchip2</instance_id>
+		<child_id>i2c-slave</child_id>
+		<child_id>vpd_assoc_parent</child_id>
+	</target_instance>
+	<target_instance>
+		<id>chip-planar_vpd-device</id>
+		<instance_id>vpdchip3</instance_id>
+		<child_id>i2c-slave</child_id>
+		<child_id>vpd_assoc_parent</child_id>
+	</target_instance>	
+	<target_instance>
+		<id>chip-spd-device</id>
 		<instance_id>spd</instance_id>
-		<attribute>
-			<attribute_id>MRW_TYPE</attribute_id>
-			<value>SPD</value>
-		</attribute>
+		<child_id>i2c-slave</child_id>
 	</target_instance>
 
 
