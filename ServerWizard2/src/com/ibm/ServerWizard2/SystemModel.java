@@ -43,17 +43,17 @@ public class SystemModel {
 			if (!strEntityId.isEmpty()) {
 				String ids[] = strEntityId.split(",");
 				for (int i=0;i<ids.length;i++) {
-					String idEnum=getEnumValue("ENTITY_ID",ids[i]);
-					if (idEnum==null) {
+					Integer entityId=getEnumValue("ENTITY_ID",ids[i]);
+					if (entityId==null) {
 						String msg=ids[i]+" is invalid for target: "+target.getName();
 						ServerWizard2.LOGGER.severe(msg);
 						throw new Exception(msg);
 					} else {
-						int entityId=Byte.decode(idEnum);
-						if (entityId==sdr.getEntityId() && entityInst==sdr.getEntityInstance()) {
+						if (entityId==(int)sdr.getEntityId() && entityInst==sdr.getEntityInstance()) {
 							ServerWizard2.LOGGER.info("SDRImport: Target="+target.getName()+"; EntityID="+entityId+"; EntityInst="+entityInst);
 							imported=true;
 							sdr.setTarget(target);
+							sdr.setEntityName(ids[i]);
 						}
 					}
 				}
@@ -76,9 +76,14 @@ public class SystemModel {
 		return childTargetTypes.get(targetType);
 	}
 
-	public String getEnumValue(String enumerator, String value) {
+	public Integer getEnumValue(String enumerator, String value) {
 		Enumerator e = enumerations.get(enumerator);
-		return e.getEnum(value);
+		return e.getEnumInt(value);
+	}
+
+	public String getEnumValueStr(String enumerator, String value) {
+		Enumerator e = enumerations.get(enumerator);
+		return e.getEnumStr(value);
 	}
 
 	public static String getElement(Element a, String e) {
@@ -342,12 +347,12 @@ public class SystemModel {
 		Document document = builder.parse(fileName);
 		HashMap<String, Vector<TargetName>> children = new HashMap<String, Vector<TargetName>>();
 		HashMap<String, Target> instanceLookup = new HashMap<String, Target>();
-		NodeList targetInstanceList = document.getElementsByTagName("target_instance");
+		NodeList targetInstanceList = document.getElementsByTagName("targetInstance");
 		for (int i = 0; i < targetInstanceList.getLength(); ++i) {
 			Element t = (Element) targetInstanceList.item(i);
 			// TODO: error checking
-			String targetType = SystemModel.getElement(t, "id");
-			String instanceId = SystemModel.getElement(t, "instance_id");
+			String targetType = SystemModel.getElement(t, "type");
+			String instanceId = SystemModel.getElement(t, "id");
 
 			Target modelTarget = targetModels.get(targetType);
 			if (modelTarget == null) {
@@ -387,12 +392,11 @@ public class SystemModel {
 			}
 
 			// update attribute values
-			NodeList attributeList = t.getElementsByTagName("attribute");
-			for (int j = 0; j < attributeList.getLength(); ++j) {
-				String attributeId = t.getElementsByTagName("attribute_id").item(j).getChildNodes()
-						.item(0).getNodeValue();
-				String attributeValue = t.getElementsByTagName("value").item(j).getChildNodes()
-						.item(0).getNodeValue();
+			NodeList attrList = t.getElementsByTagName("attribute");
+			for (int j = 0; j < attrList.getLength(); ++j) {
+				Element attr = (Element) attrList.item(j);
+				String attributeId = SystemModel.getElement(attr, "id");
+				String attributeValue = SystemModel.getElement(attr, "default");
 				target.updateAttributeValue(attributeId, attributeValue);
 			}
 		}

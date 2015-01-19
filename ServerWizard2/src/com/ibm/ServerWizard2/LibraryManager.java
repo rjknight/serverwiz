@@ -85,7 +85,7 @@ public class LibraryManager {
 			files.add(f4);
 
 			LibraryFile f5 = new LibraryFile();
-			f5.init(swUrl + "xml/target_instances.xml", workingDir,
+			f5.init(swUrl + "xml/target_instances_v2.xml", workingDir,
 					LibraryFile.FileTypes.TARGET_INSTANCES_XML);
 			files.add(f5);
 

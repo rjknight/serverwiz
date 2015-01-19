@@ -28,7 +28,11 @@ public class Enumerator {
 	    	addEnum(name,value);
 	    }
 	}
-	public String getEnum(String e) {
+	public Integer getEnumInt(String e) {
+		return Integer.decode(enumValues.get(e));
+	}
+	public String getEnumStr(String e) {
 		return enumValues.get(e);
 	}
+
 }

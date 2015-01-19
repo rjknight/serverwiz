@@ -170,8 +170,12 @@ public class TargetWizardController {
 				ipmiSensors = new Vector<String>();
 				ipmiAttr.put(t, ipmiSensors);
 			}
-			ipmiSensors.add(String.format("0x%02x", sdr.getEntityId())+","+
+			//ipmiSensors.add(String.format("0x%02x", sdr.getEntityId())+","+
+			//		String.format("0x%02x", sdr.getSensorId()));
+			ipmiSensors.add(sdr.getEntityName()+","+
 					String.format("0x%02x", sdr.getSensorId()));
+
+			System.out.println(t.getName()+","+ipmiSensors);
 		}
 		for (Map.Entry<Target, Vector<String>> entry : ipmiAttr.entrySet()) {
 			Target t=entry.getKey();

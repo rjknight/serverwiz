@@ -231,58 +231,6 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 		return (this.getAttribute("CLASS").equals("ENC"));
 	}
 
-	/*
-	public void writeCard(Writer out) throws Exception {
-		Vector<Target> parts = new Vector<Target>();
-		Vector<Target> connectors = new Vector<Target>();
-		for (Target child : this.getChildren()) {
-			if (child.getAttribute("CLASS").contains("CHIP")) {
-				parts.add(child);
-			}
-			if (child.getAttribute("CLASS").contains("CONNECTOR")) {
-				connectors.add(child);
-			}
-		}
-		out.write("<card>\n");
-		out.write("\t<id>" + this.getName() + "</id>\n");
-		out.write("\t<target-id>" + this.getId() + "</target-id>\n");
-		out.write("\t<card-type>" + this.getType() + "</card-type>\n");
-		out.write("\t<description></description>\n");
-		
-		out.write("\t<parts-used>\n");
-		for (Target part : parts) {
-			out.write("\t\t<part-used>" + part.getType() + "</part-used>\n");
-		}
-		out.write("\t</parts-used>\n");
-		out.write("\t<connectors-used>\n");
-		for (Target conn : connectors) {
-			out.write("\t\t<connector-used>" + conn.getType() + "</connector-used>\n");
-		}
-		out.write("\t</connectors-used>\n");
-		
-		out.write("\t<part-instances>\n");
-		for (Target part : parts) {
-				out.write("\t\t<part-instance>");
-				out.write("<id>" + part.getName() + "</id>");
-				out.write("<part-id>" + part.getType() + "</part-id>");
-				out.write("<position>" + part.getPosition() + "</position>");
-				out.write("</part-instance>\n");
-		}
-		out.write("\t</part-instances>\n");
-		out.write("\t<connector-instances>\n");
-		for (Target conn : connectors) {
-				out.write("\t\t<connector-instance>");
-				out.write("<id>" + conn.getName() + "</id>");
-				out.write("<connector-id>" + conn.getType() + "</connector-id>");
-				out.write("<position>" + conn.getPosition() + "</position>");
-				out.write("</connector-instance>\n");
-		}
-		out.write("\t</connector-instances>\n");
-		writeBusses(out);
-		out.write("</card>\n");
-		
-	}
-*/
 	public void setAttributeValue(String attr, String value) {
 		Attribute attribute = this.attributes.get(attr);
 		if (attribute == null) {
@@ -367,7 +315,6 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 	}
 
 	public void readInstanceXML(Element t, Vector<TargetName> children, TreeMap<String, Target> targetModels) throws Exception {
-		//parentPath = SystemModel.getElement(t, "parent_path");
 		name = SystemModel.getElement(t, "instance_name");
 		type = SystemModel.getElement(t, "type");
 		setPosition(SystemModel.getElement(t, "position"));
@@ -415,7 +362,7 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 		out.write("<targetInstance>\n");
 		out.write("\t<id>" + this.getName() + "</id>\n");
 		out.write("\t<type>" + this.getType() + "</type>\n");
-		out.write("\t<class>" + this.getAttribute("CLASS") + "</class>\n");
+		//out.write("\t<class>" + this.getAttribute("CLASS") + "</class>\n");
 		if (!this.name.isEmpty()) {
 			out.write("\t<instance_name>" + this.name + "</instance_name>\n");
 		} else {
