@@ -143,6 +143,7 @@ sub processProcessor
        $targetObj->getTargetParent($targetObj->getTargetParent($target));
     $targetObj->copyAttribute($socket_target,$target,"LOCATION_CODE");
     $targetObj->copyAttribute($socket_target,$target,"FRU_ID");
+    $targetObj->copyAttribute($socket_target,$target,"IPMI_SENSORS");
     
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
@@ -458,6 +459,7 @@ sub processPcie
     my $phb_config = "00000000";
 
     my %cfg_check;
+    my @equalization;
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
         my $num_connections = $targetObj->getNumConnections($child);
@@ -487,6 +489,9 @@ sub processPcie
               $targetObj->getAttribute($child, "PCIE_LANE_MASK");
             $lane_rev[$iop_num][$lane_set] =
               $targetObj->getBusAttribute($child, 0, "LANE_REVERSAL");
+            $equalization[$phb_num] = $targetObj->getBusAttribute($child, 0, 
+              "PROC_PCIE_LANE_EQUALIZATION");  
+
             ## check to make sure more than 1 config is not used
             if ($cfg_check{$iop_num} ne "")
             {
@@ -539,6 +544,11 @@ sub processPcie
 
     ## don't support DSMP
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_DSMP_CAPABLE","0,0,0,0");
+    
+    my $equalization_str=join(',',@equalization);
+    $targetObj->setAttribute($parentTarget,"PROC_PCIE_LANE_EQUALIZATION",
+         $equalization_str);
+    
 }
 #--------------------------------------------------
 ## OCC
@@ -626,9 +636,10 @@ sub processMembuf
                        $dimms->{CONN}->[0]);
             setEepromAttributes($targetObj,
                        "EEPROM_VPD_FRU_INFO",$dimm_target,
-                       $dimms->{CONN}->[0]);
+                       $dimms->{CONN}->[0],"0++");
         }
     }
+    ## Do MBA port mapping
     my %mba_port_map;
     my $ddrs=$targetObj->findConnections($target,"DDR3","DIMM");
     if ($ddrs ne "") {
@@ -640,6 +651,10 @@ sub processMembuf
             $targetObj->setAttribute($dimm, "MBA_DIMM",$dimmnum);
             $targetObj->setAttribute($dimm, "MBA_PORT",$port);
             $portmap{$mba}++;
+            
+            ## Copy connector attributes
+            my $dimmconn=$targetObj->getTargetParent($dimm);
+            $targetObj->copyAttribute($dimmconn,$dimm,"IPMI_SENSORS");
         }
     }
 }
@@ -651,7 +666,8 @@ sub setEepromAttributes
     my $name = shift;
     my $target = shift;
     my $conn_target = shift;
-    
+    my $fru = shift;
+   
     my $port = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_PORT");
     my $engine = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_ENGINE");
     my $addr = $targetObj->getBusAttribute($conn_target->{SOURCE},
@@ -676,6 +692,11 @@ sub setEepromAttributes
     $targetObj->setAttributeField($target, $name, "maxMemorySizeKB", $mem);
     $targetObj->setAttributeField($target, $name, "writePageSize", $page);
     $targetObj->setAttributeField($target, $name, "writeCycleTime", $cycle);
+    
+    if ($fru ne "")
+    {
+        $targetObj->setAttributeField($target, $name, "fruId", $fru);
+    }
 }
 
 

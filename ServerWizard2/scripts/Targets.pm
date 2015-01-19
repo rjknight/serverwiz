@@ -166,6 +166,8 @@ sub printAttribute
     $filter{LOCATION_CODE}       = 1;
     $filter{MCS_NUM}             = 1;
     $filter{SCHEMATIC_INTERFACE} = 1;
+    $filter{ENTITY_ID} = 1;
+    $filter{CLASS} = 1;
 
     if ($filter{$attribute} == 1) { return; }
     print $fh "\t<attribute>\n";
