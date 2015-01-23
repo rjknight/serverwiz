@@ -3,8 +3,8 @@ use XML::Simple;
 use Data::Dumper;
 
 $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
-my $xml_gold = XMLin("C:\\Users\\IBM_ADMIN\\Documents\\workspace.juno\\ServerWizard2\\xml\\FIRESTONE_hb.mrw.ref.xml");
-my $xml_new = XMLin("C:\\Users\\IBM_ADMIN\\Documents\\workspace.juno\\ServerWizard2\\xml\\FIRESTONE_hb.mrw.xml");
+my $xml_gold = XMLin("C:\\Users\\IBM_ADMIN\\Documents\\GitHub\\ServerWizard2\\ServerWizard2\\xml\\systems\\FIRESTONE_hb.mrw.ref.xml");
+my $xml_new = XMLin("C:\\Users\\IBM_ADMIN\\Documents\\GitHub\\ServerWizard2\\ServerWizard2\\xml\\systems\\FIRESTONE_hb.mrw.xml");
 
 #print Dumper($xml_gold);
 my % attr_values;

@@ -85,6 +85,16 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     }
 }
 
+## check topology
+foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
+    foreach my $p (keys %{$targetObj->{TOPOLOGY}->{$n}}) {
+        if ($targetObj->{TOPOLOGY}->{$n}->{$p} > 1) {
+            print "ERROR: Fabric topology invalid.  2 targets have same ".
+                  "FABRIC_NODE_ID,FABRIC_CHIP_ID ($n,$p)\n";
+            $targetObj->myExit(3);
+        }
+    }
+}
 ## check for errors
 foreach my $target (keys %{ $targetObj->getAllTargets() })
 {
@@ -122,8 +132,27 @@ sub processSystem
         $targetObj->{NUM_PROCS_PER_NODE} * $targetObj->{MAX_MCS});
     $targetObj->setAttribute($target, "MAX_PROC_CHIPS_PER_NODE",
         $targetObj->{NUM_PROCS_PER_NODE});
+    parseBitwise($targetObj,$target,"CDM_POLICIES");
+   
 }
 
+sub parseBitwise
+{
+    my $targetObj = shift;
+    my $target = shift;
+    my $attribute = shift;
+    
+    my $mask = 0;
+    foreach my $e (keys %{ $targetObj->getEnumHash($attribute) }) {
+        my $field = $targetObj->getAttributeField($target,$attribute."_BITMASK",$e);
+        my $val=hex($targetObj->getEnumValue($attribute,$e));
+        if ($field eq "true")
+        {
+            $mask=$mask | $val;
+        }        
+    }
+    $targetObj->setAttribute($target,$attribute,$mask);
+}
 #--------------------------------------------------
 ## Processor
 ##
@@ -144,7 +173,7 @@ sub processProcessor
     $targetObj->copyAttribute($socket_target,$target,"LOCATION_CODE");
     $targetObj->copyAttribute($socket_target,$target,"FRU_ID");
     $targetObj->copyAttribute($socket_target,$target,"IPMI_SENSORS");
-    
+        
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
     {
@@ -165,6 +194,10 @@ sub processProcessor
         if ($child_type eq "ABUS")
         {
             processAbus($targetObj, $child);
+        }
+        elsif ($child_type eq "XBUS")
+        {
+            processXbus($targetObj, $child);
         }
         elsif ($child_type eq "FSIM" || $child_type eq "FSICM")
         {
@@ -200,7 +233,7 @@ sub processProcessor
         "EEPROM_VPD_FRU_INFO","i2cMasterPath",$path);
                                 
     ## initialize master processor FSI's
-    $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "flipPort", "1");
+    $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "flipPort", "0");
 
     if ($target eq $targetObj->getMasterProc())
     {
@@ -219,14 +252,63 @@ sub processProcessor
         $targetObj->setAttribute($target, "PROC_MASTER_TYPE",
             "MASTER_CANDIDATE");
     }
+    ## Update bus speeds
+    processI2cSpeeds($targetObj,$target);
+    
+    ## these are hardcoded because code sets them properly
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "reserved",   "0");
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom", "0");
+    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom", "1");
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useInbandScom",
         "0");
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "1");
+    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "0");
     
     processMembufVpdAssociation($targetObj,$target);
     setupBars($targetObj,$target);
+}
+
+
+sub processI2cSpeeds
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    
+    my @bus_speeds;
+    my $bus_speed_attr=$targetObj->getAttribute($target,"I2C_BUS_SPEED_ARRAY");
+    my @bus_speeds2 = split(/,/,$bus_speed_attr);
+    $bus_speeds[0][0] = $bus_speeds2[0];
+    $bus_speeds[0][1] = $bus_speeds2[1];
+    $bus_speeds[0][2] = $bus_speeds2[2];
+    $bus_speeds[1][0] = $bus_speeds2[3];
+    $bus_speeds[1][1] = $bus_speeds2[4];
+    $bus_speeds[1][2] = $bus_speeds2[5];
+    
+    my $i2cs=$targetObj->findConnections($target,"I2C","");
+    if ($i2cs ne "") {
+        foreach my $i2c (@{$i2cs->{CONN}}) {
+            my $port=oct($targetObj->getAttribute($i2c->{SOURCE},"I2C_PORT"));
+            my $engine=oct($targetObj->getAttribute($i2c->{SOURCE},"I2C_ENGINE"));
+            my $bus_speed=$targetObj->getBusAttribute(
+                  $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
+            if ($bus_speed eq "" || $bus_speed==0) {
+                print "ERROR: I2C speed bus not defined for $i2c->{SOURCE}\n";
+                $targetObj->myExit(3);
+            }
+            ## choose lowest bus speed
+            if ($bus_speeds[$engine][$port] eq "" ||
+                  $bus_speeds[$engine][$port]==0  ||
+                  $bus_speed < $bus_speeds[$engine][$port]) {
+                $bus_speeds[$engine][$port] = $bus_speed;
+            }
+        }
+    }
+    $bus_speed_attr = $bus_speeds[0][0].",".
+                      $bus_speeds[0][1].",".
+                      $bus_speeds[0][2].",".
+                      $bus_speeds[1][0].",".
+                      $bus_speeds[1][1].",".
+                      $bus_speeds[1][2];
+                         
+    $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);                   
 }
 
 ################################
@@ -241,6 +323,7 @@ sub setupBars
 
     my $node = $targetObj->getAttribute($target, "FABRIC_NODE_ID");
     my $proc   = $targetObj->getAttribute($target, "FABRIC_CHIP_ID");
+    $targetObj->{TOPOLOGY}->{$node}->{$proc}++;
     
     my @bars=("FSP_BASE_ADDR","PSI_BRIDGE_BASE_ADDR",
               "INTP_BASE_ADDR","PHB_BASE_ADDRS","PCI_BASE_ADDRS_32",
@@ -290,7 +373,7 @@ sub processMcs
 
     my $node = $targetObj->getAttribute($parentTarget, "FABRIC_NODE_ID");
     my $proc   = $targetObj->getAttribute($parentTarget, "FABRIC_CHIP_ID");
-
+    
     my ($base,$node_offset,$proc_offset,$offset) = split(/,/,
                $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
     my $i_base = Math::BigInt->new($base);
@@ -305,6 +388,20 @@ sub processMcs
     $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
 }
 
+
+#--------------------------------------------------
+## XBUS
+##
+## Finds XBUS connections and creates PEER TARGET attributes
+
+sub processXbus
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    $targetObj->setAttribute($target, "PEER_TARGET","physical:na");
+}
+
 #--------------------------------------------------
 ## ABUS
 ##
@@ -315,20 +412,26 @@ sub processAbus
     my $targetObj = shift;
     my $target    = shift;
 
+    my $found_abus = 0;
+    ## TODO: Need to initialize properly
+    #$targetObj->setAttribute($target, "PEER_PATH","physical:na");
+            
     my $abus_child_conn = $targetObj->getFirstConnectionDestination($target);
     if ($abus_child_conn ne "")
     {
         ## set attributes for both directions
         my $aff1 = $targetObj->getAttribute($target, "AFFINITY_PATH");
         my $aff2 = $targetObj->getAttribute($abus_child_conn, "AFFINITY_PATH");
+        
         $targetObj->setAttribute($abus_child_conn, "PEER_TARGET",
             $targetObj->getAttribute($target, "PHYS_PATH"));
         $targetObj->setAttribute($target, "PEER_TARGET",
             $targetObj->getAttribute($abus_child_conn, "PHYS_PATH"));
+        
         $targetObj->setAttribute($abus_child_conn, "PEER_PATH",
             $targetObj->getAttribute($target, "PHYS_PATH"));
         $targetObj->setAttribute($target, "PEER_PATH",
-            $targetObj->getAttribute($abus_child_conn, "PHYS_PATH"));
+            $targetObj->getAttribute($abus_child_conn, "PHYS_PATH"));    
 
         # copy Abus attributes to proc
         my $abus = $targetObj->getFirstConnectionBus($target);
@@ -340,6 +443,7 @@ sub processAbus
             $abus->{bus_attribute}->{DEST_TX_LANE_INVERT}->{default});
         $targetObj->setAttribute($abus_child_conn, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
+        $found_abus = 1;
     }
 }
 
@@ -363,55 +467,12 @@ sub processFsi
     {
         my $fsi_link = $targetObj->getAttribute($target, "FSI_LINK");
         my $fsi_port = $targetObj->getAttribute($target, "FSI_PORT");
-
         my $cmfsi = $targetObj->getAttribute($target, "CMFSI");
-
-        my $flipPort         = 0;
+        my $flip_port         = 0;
+        my $proc_path = $targetObj->getAttribute($parentTarget,"PHYS_PATH");
         my $fsi_child_target = $targetObj->getTargetParent($fsi_child_conn);
-        my $child_type       = $targetObj->getType($fsi_child_target);
-
-        $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_TYPE",
-            "NO_MASTER");
-        if ($type eq "FSIM")
-        {
-            $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_TYPE",
-                "MFSI");
-        }
-        if ($type eq "FSICM")
-        {
-            $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_TYPE",
-                "CMFSI");
-        }
-        $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_CHIP",
-            "physical:sys");
-        $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_PORT", "0xFF");
-        $targetObj->setAttribute($fsi_child_target, "ALTFSI_MASTER_CHIP",
-            "physical:sys");
-        $targetObj->setAttribute($fsi_child_target, "ALTFSI_MASTER_PORT",
-            "0xFF");
-        $targetObj->setAttribute($fsi_child_target, "FSI_SLAVE_CASCADE", "0");
-
-        my $phys_path = $targetObj->getAttribute($parentTarget, "PHYS_PATH");
-        
-        if ($cmfsi == 0)
-        {
-            $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_CHIP",
-                $phys_path);
-            $targetObj->setAttribute($fsi_child_target, "FSI_MASTER_PORT",
-                $fsi_port);
-            print 
-        }
-        else
-        {
-            $targetObj->setAttribute($fsi_child_target, "ALTFSI_MASTER_CHIP",
-                $phys_path);
-            $targetObj->setAttribute($fsi_child_target, "ALTFSI_MASTER_PORT",
-                $fsi_port);
-        }
-        $targetObj->setAttributeField($fsi_child_target, "FSI_OPTION_FLAGS",
-            "flipPort", $flipPort);
-        $targetObj->setAttributeField($fsi_child_target, "FSI_OPTION_FLAGS",
-            "reserved", "0");
+        $targetObj->setFsiAttributes($fsi_child_target,
+                    $type,$cmfsi,$proc_path,$fsi_port,$flip_port);                 
     }
 }
 
@@ -490,7 +551,7 @@ sub processPcie
             $lane_rev[$iop_num][$lane_set] =
               $targetObj->getBusAttribute($child, 0, "LANE_REVERSAL");
             $equalization[$phb_num] = $targetObj->getBusAttribute($child, 0, 
-              "PROC_PCIE_LANE_EQUALIZATION");  
+              "PROC_PCIE_LANE_EQUALIZATION");
 
             ## check to make sure more than 1 config is not used
             if ($cfg_check{$iop_num} ne "")
@@ -582,11 +643,15 @@ sub processMembufVpdAssociation
                 my $membuf_target = $membuf_assoc->{DEST_PARENT};
                 setEepromAttributes($targetObj,
                        "EEPROM_VPD_PRIMARY_INFO",$membuf_target,$vpd);
+                my $index = $targetObj->getBusAttribute($membuf_assoc->{SOURCE},
+                                $membuf_assoc->{BUS_NUM}, "ISDIMM_MBVPD_INDEX");
+                $targetObj->setAttribute(
+                            $membuf_target,"ISDIMM_MBVPD_INDEX",$index);  
             }
         }
     }
-    
 }
+
 #--------------------------------------------------
 ## MEMBUF
 ##
@@ -603,6 +668,7 @@ sub processMembuf
         ##dmi is probably not connected.  will get caught in error checking
         return;
     }
+    
     processMembufVpdAssociation($targetObj,$target);
       
     ## finds which gpio expander that controls vddr regs for membufs
@@ -639,6 +705,9 @@ sub processMembuf
                        $dimms->{CONN}->[0],"0++");
         }
     }
+    ## Update bus speeds
+    processI2cSpeeds($targetObj,$target);
+    
     ## Do MBA port mapping
     my %mba_port_map;
     my $ddrs=$targetObj->findConnections($target,"DDR3","DIMM");

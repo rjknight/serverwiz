@@ -46,6 +46,13 @@ sub new
         errorsExist  => 0,
         NUM_PROCS    => 0,
         TOP_LEVEL    => "sys-0",
+        TOPOLOGY     => undef,
+        DMI_FSI_MAP  => {
+            '0' => '3',
+            '1' => '2',
+            '4' => '7',
+            '5' => '6'
+        }
     };
     return bless $self, $class;
 }
@@ -150,24 +157,31 @@ sub printAttribute
     my $attribute  = shift;
     my $r          = "";
 
+    ##temporary until we converge attribute types
     my %filter;
-    $filter{MRW_TYPE}            = 1;
-    $filter{INSTANCE_PATH}       = 1;
-    $filter{SYSTEM_NAME}         = 1;
-    $filter{BUS_TYPE}            = 1;
-    $filter{DIRECTION}           = 1;
-    $filter{ENABLE_CAPI}         = 1;
-    $filter{PCIE_CONFIG_NUM}     = 1;
-    $filter{PCIE_LANE_MASK}      = 1;
-    $filter{PCIE_LANE_SET}       = 1;
-    $filter{PCIE_NUM_LANES}      = 1;
-    $filter{PHB_NUM}             = 1;
-    $filter{IOP_NUM}             = 1;
-    $filter{LOCATION_CODE}       = 1;
-    $filter{MCS_NUM}             = 1;
-    $filter{SCHEMATIC_INTERFACE} = 1;
-    $filter{ENTITY_ID} = 1;
-    $filter{CLASS} = 1;
+    $filter{MRW_TYPE}                       = 1;
+    $filter{INSTANCE_PATH}                  = 1;
+    $filter{SYSTEM_NAME}                    = 1;
+    $filter{BUS_TYPE}                       = 1;
+    $filter{DIRECTION}                      = 1;
+    $filter{ENABLE_CAPI}                    = 1;
+    $filter{PCIE_CONFIG_NUM}                = 1;
+    $filter{PCIE_LANE_MASK}                 = 1;
+    $filter{PCIE_LANE_SET}                  = 1;
+    $filter{PCIE_NUM_LANES}                 = 1;
+    $filter{PHB_NUM}                        = 1;
+    $filter{IOP_NUM}                        = 1;
+    $filter{LOCATION_CODE}                  = 1;
+    $filter{MCS_NUM}                        = 1;
+    $filter{SCHEMATIC_INTERFACE}            = 1;
+    $filter{ENTITY_ID}                      = 1;
+    $filter{CLASS}                          = 1;
+    $filter{MODEL}                          = 1;
+    $filter{TYPE}                           = 1;
+    $filter{CDM_POLICIES}                   = 1;
+    $filter{ALL_MCS_IN_INTERLEAVING_GROUP}  = 1;
+    $filter{MSS_INTERLEAVE_ENABLE}          = 1;
+    $filter{CDM_POLICIES_BITMASK}           = 1;
 
     if ($filter{$attribute} == 1) { return; }
     print $fh "\t<attribute>\n";
@@ -266,8 +280,15 @@ sub buildHierarchy
             {
                 foreach my $f (keys %{ $value->{field} })
                 {
-                    $self->setAttributeField($key, $attribute, $f,
-                        $value->{field}{$f}{value});
+                    my $field_val=$value->{field}{$f}{value};
+                    if (ref($field_val)) {
+                        $self->setAttributeField($key, $attribute, $f,"");
+                    } 
+                    else 
+                    {
+                        $self->setAttributeField($key, $attribute, $f,
+                            $value->{field}{$f}{value});
+                    }
                 }
             }
             else
@@ -402,15 +423,20 @@ sub buildAffinity
                 $self->{master_proc} = $target;
             }
             $self->setHuid($target, 0, $node);
+            my $socket = $self->getTargetParent(
+                         $self->getTargetParent($target));
             my $parent_affinity = "affinity:sys-0/node-$node/proc-$proc";
             my $parent_physical = "physical:sys-0/node-$node/proc-$proc";
             $self->setAttribute($target, "AFFINITY_PATH",  $parent_affinity);
             $self->setAttribute($target, "PHYS_PATH",      $parent_physical);
             $self->setAttribute($target, "POSITION",       $proc);
-            $self->setAttribute($target, "FABRIC_NODE_ID", $node);
-            $self->setAttribute($target, "FABRIC_CHIP_ID", $proc);
+            $self->setAttribute($target, "FABRIC_NODE_ID", 
+                  $self->getAttribute($socket,"FABRIC_NODE_ID"));
+             $self->setAttribute($target, "FABRIC_CHIP_ID", 
+                  $self->getAttribute($socket,"FABRIC_CHIP_ID"));      
+
             $self->setAttribute($target, "VPD_REC_NUM",    $proc);
-            
+
             
             foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
             {
@@ -442,6 +468,9 @@ sub buildAffinity
                     ## export core
                     if ($unit_type eq "EX")
                     {
+                        my $core_unit_num = $self->getAttribute($unit,
+                            "CHIP_UNIT");
+                        
                         my $core_unit =
                           $self->{data}->{TARGETS}{$unit}{CHILDREN}[0];
                         push(
@@ -463,6 +492,8 @@ sub buildAffinity
                             $core_affinity_path);
                         $self->setAttribute($core_unit, "PHYS_PATH",
                             $core_physical_path);
+                        $self->setAttribute($core_unit, "CHIP_UNIT",
+                            $core_unit_num);
                         $self->setHuid($core_unit, 0, $node);
                     }
                 }
@@ -512,9 +543,8 @@ sub processMcs
             $node_phys . "/membuf-$membufnum");
         $self->setAttribute($membuf, "VPD_REC_NUM",
             $self->getAttribute($membuf, "POSITION"));
+        
         ## copy DMI bus attributes to membuf
-        $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE",
-            $dmi_bus->{bus_attribute}->{DMI_REFCLOCK_SWIZZLE}->{default});
         $self->setAttribute($unit, "EI_BUS_TX_LANE_INVERT",
             $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}->{default});
         $self->setAttribute($unit, "EI_BUS_TX_MSBSWAP",
@@ -524,6 +554,25 @@ sub processMcs
         $self->setAttribute($membuf, "EI_BUS_TX_MSBSWAP",
             $dmi_bus->{bus_attribute}->{MEMBUF_TX_MSBSWAP}->{default});
 
+        ## auto setup FSI assuming schematic symbol.  If FSI busses are
+        ## defined in serverwiz2, this will be overridden
+        ## in the schematic symbol, the fsi port num matches dmi ref clk num
+        
+        my $fsi_port = $self->{DMI_FSI_MAP}->{$mcs};
+        my $proc_key = 
+            $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY};
+        my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
+        $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);        
+        $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE",$fsi_port);
+        my $dmi_swizzle = 
+             $dmi_bus->{bus_attribute}->{DMI_REFCLOCK_SWIZZLE}->{default};
+        my $dmi_swizzle = 
+             $self->getBusAttribute($unit,0,"DMI_REFCLOCK_SWIZZLE");
+        if ($dmi_swizzle ne "")
+        {
+            $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE",$dmi_swizzle);
+        }
+        
         $self->setHuid($membuf, 0, $node);
         $self->{targeting}
           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs] {MEMBUFS}[0]{KEY} =
@@ -594,6 +643,49 @@ sub processMcs
         }
     }
 }
+
+sub setFsiAttributes
+{
+    my $self = shift;
+    my $target = shift;
+    my $type = shift;
+    my $cmfsi = shift;
+    my $phys_path = shift;
+    my $fsi_port = shift;
+    my $flip_port = shift;
+    
+    $self->setAttribute($target, "FSI_MASTER_TYPE","NO_MASTER");
+    if ($type eq "FSIM")
+    {
+        $self->setAttribute($target, "FSI_MASTER_TYPE","MFSI");
+    }
+    if ($type eq "FSICM")
+    {
+        $self->setAttribute($target, "FSI_MASTER_TYPE","CMFSI");
+    }
+    $self->setAttribute($target, "FSI_MASTER_CHIP","physical:sys");
+    $self->setAttribute($target, "FSI_MASTER_PORT","0xFF");
+    $self->setAttribute($target, "ALTFSI_MASTER_CHIP","physical:sys");
+    $self->setAttribute($target, "ALTFSI_MASTER_PORT","0xFF");
+    $self->setAttribute($target, "FSI_SLAVE_CASCADE", "0");
+    if ($cmfsi == 0)
+    {
+        $self->setAttribute($target, "FSI_MASTER_CHIP",$phys_path);
+        $self->setAttribute($target, "FSI_MASTER_PORT", $fsi_port);
+    }
+    else
+    {
+        $self->setAttribute($target, "ALTFSI_MASTER_CHIP",$phys_path);
+        $self->setAttribute($target, "ALTFSI_MASTER_PORT", $fsi_port);
+    }
+    
+    #my $phys_path = $targetObj->getAttribute($parentTarget, "PHYS_PATH");
+    $self->setAttributeField($target, "FSI_OPTION_FLAGS","flipPort", 
+          $flip_port);
+    $self->setAttributeField($target, "FSI_OPTION_FLAGS","reserved", "0");
+    
+}
+
 
 ## returns pointer to target from target name
 sub getTarget
@@ -726,7 +818,7 @@ sub findConnections
                 my $dest_type   = $self->getType($dest_parent);
                 if ($type eq "NA") { $type = $dest_type; }
                 
-                if ($type eq $end_type)
+                if ($type eq $end_type || $end_type eq "")
                 {
                     $connections{CONN}[$num]{SOURCE}=$child;
                     $connections{CONN}[$num]{SOURCE_PARENT}=$target;
@@ -916,16 +1008,6 @@ sub setAttribute
     $target_ptr->{ATTRIBUTES}->{$attribute}->{default} = $value;
     $self->log($target, "Setting Attribute: $attribute=$value");
 }
-sub setAttribute
-{
-    my $self       = shift;
-    my $target     = shift;
-    my $attribute  = shift;
-    my $value      = shift;
-    my $target_ptr = $self->getTarget($target);
-    $target_ptr->{ATTRIBUTES}->{$attribute}->{default} = $value;
-    $self->log($target, "Setting Attribute: $attribute=$value");
-}
 ## sets the field of a complex attribute
 sub setAttributeField
 {
@@ -937,6 +1019,27 @@ sub setAttributeField
     $self->{data}->{TARGETS}->{$target}->{ATTRIBUTES}->{$attribute}->{default}
       ->{field}->{$field}->{value} = $value;
 }
+## returns complex attribute value
+sub getAttributeField
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $attribute  = shift;
+    my $field      = shift;
+    my $target_ptr = $self->getTarget($target);
+    if (!defined($target_ptr->{ATTRIBUTES}->{$attribute}->
+       {default}->{field}->{$field}->{value}))
+    {
+        printf("ERROR: getAttributeField(%s,%s,%s) | Attribute not defined\n",
+            $target, $attribute,$field);
+
+        $self->myExit(4);
+    }
+   
+    return $target_ptr->{ATTRIBUTES}->{$attribute}->
+           {default}->{field}->{$field}->{value};
+}
+
 ## returns an attribute from a bus
 sub getBusAttribute
 {
@@ -986,6 +1089,21 @@ sub getEnumValue
         $self->myExit(4);
     }
     return $self->{enumeration}->{$enumType}->{$enumName};
+}
+
+sub getEnumHash
+{
+    my $self     = shift;
+    my $enumType = shift;
+    my $enumName = shift;
+    if (!defined($self->{enumeration}->{$enumType}))
+    {
+        printf("ERROR: getEnumValue(%s) | enumType not defined\n",
+            $enumType);
+            print Dumper($self->{enumeration});
+        $self->myExit(4);
+    }
+    return $self->{enumeration}->{$enumType};
 }
 
 sub setHuid
