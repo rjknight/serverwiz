@@ -11,7 +11,7 @@ public class ServerWizard2 {
 	 * @param args
 	 */
 	
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "1.1.0";
 	public final static Logger LOGGER = Logger.getLogger(ServerWizard2.class.getName()); 
 	
 	public static void main(String[] args) {
@@ -36,9 +36,6 @@ public class ServerWizard2 {
 		LOGGER.config("ServerWiz2 Starting.  VERSION: "+VERSION);
 		TargetWizardController tc = new TargetWizardController();
 		SystemModel systemModel = new SystemModel();
-		//Display d = new Display();
-		//Shell s = new Shell(d);
-		//s.setSize(300, 480);
 	    MainDialog view = new MainDialog(null);
 	    tc.setView(view);
 	    tc.setModel(systemModel);

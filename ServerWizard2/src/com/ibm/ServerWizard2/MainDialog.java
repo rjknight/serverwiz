@@ -9,13 +9,10 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -41,10 +38,12 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 
 public class MainDialog extends Dialog {
 	private Table table;
-	private Vector<TableEditor> tableEditor;
+	//private Vector<TableEditor> tableEditor;
 	private Tree tree;
 	private Tree treeBus;
 	private Text txtInstanceName;
@@ -77,12 +76,14 @@ public class MainDialog extends Dialog {
 	private Button btnRunChecks;
 	private SashForm sashForm;
 	private SashForm sashForm_1;
-	
+
 	private Composite compositeBus;
 	private Label lblInstanceType;
 	private Composite compositeInstance;
 	private Composite composite;
 	private Label lblNewLabel;
+
+	private TableEditor editor;
 
 	/**
 	 * Create the dialog.
@@ -112,13 +113,14 @@ public class MainDialog extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 		container = (Composite) super.createDialogArea(parent);
 		container.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-		tableEditor = new Vector<TableEditor>();
+		//tableEditor = new Vector<TableEditor>();
 		container.setLayout(new GridLayout(1, false));
-		
+
 		lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setForeground(SWTResourceManager.getColor(SWT.COLOR_LINK_FOREGROUND));
-		lblNewLabel.setText("To start a new system, click on 'sys-0' instance, then chose instance type, then click 'Add Instance' button");
-				
+		lblNewLabel
+				.setText("To start a new system, click on 'sys-0' instance, then chose instance type, then click 'Add Instance' button");
+
 		composite = new Composite(container, SWT.NONE);
 		RowLayout rl_composite = new RowLayout(SWT.HORIZONTAL);
 		rl_composite.wrap = false;
@@ -137,33 +139,33 @@ public class MainDialog extends Dialog {
 		lblInstanceType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblInstanceType.setText("Instance Type:");
 		lblInstanceType.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-		
-				combo = new Combo(compositeInstance, SWT.NONE);
-				GridData gd_combo = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-				gd_combo.widthHint = 167;
-				combo.setLayoutData(gd_combo);
-				combo.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-		
-				btnAddTargetButton = new Button(compositeInstance, SWT.NONE);
-				btnAddTargetButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-				btnAddTargetButton.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-				btnAddTargetButton.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						Target chk = (Target) combo.getData(combo.getText());
-						if (chk != null) {
-							TreeItem selectedItem = tree.getSelection()[0];
-							Target parentTarget = (Target) selectedItem.getData();
-							String nameOverride = txtInstanceName.getText();
-							controller.addTargetInstance(chk, parentTarget, selectedItem, nameOverride);
-							txtInstanceName.setText("");
-							selectedItem.setExpanded(true);
-							setDirtyState(true);
-						}
-					}
-				});
-				btnAddTargetButton.setText("Add Instance");
-				btnAddTargetButton.setEnabled(false);
+
+		combo = new Combo(compositeInstance, SWT.NONE);
+		GridData gd_combo = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_combo.widthHint = 167;
+		combo.setLayoutData(gd_combo);
+		combo.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+
+		btnAddTargetButton = new Button(compositeInstance, SWT.NONE);
+		btnAddTargetButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnAddTargetButton.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		btnAddTargetButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Target chk = (Target) combo.getData(combo.getText());
+				if (chk != null) {
+					TreeItem selectedItem = tree.getSelection()[0];
+					Target parentTarget = (Target) selectedItem.getData();
+					String nameOverride = txtInstanceName.getText();
+					controller.addTargetInstance(chk, parentTarget, selectedItem, nameOverride);
+					txtInstanceName.setText("");
+					selectedItem.setExpanded(true);
+					setDirtyState(true);
+				}
+			}
+		});
+		btnAddTargetButton.setText("Add Instance");
+		btnAddTargetButton.setEnabled(false);
 
 		Label lblName = new Label(compositeInstance, SWT.NONE);
 		lblName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -178,115 +180,115 @@ public class MainDialog extends Dialog {
 
 		compositeBus = new Composite(composite, SWT.BORDER);
 		compositeBus.setLayoutData(new RowData(420, SWT.DEFAULT));
-						
-								btnDeleteTarget = new Button(compositeInstance, SWT.NONE);
-								btnDeleteTarget.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-								btnDeleteTarget.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-								btnDeleteTarget.addSelectionListener(new SelectionAdapter() {
-									@Override
-									public void widgetSelected(SelectionEvent e) {
-										TreeItem treeitem = tree.getSelection()[0];
-										TreeItem parentItem = treeitem.getParentItem();
-										controller.deleteTarget((Target) treeitem.getData());
-										// clearTreeAll();
-										// controller.updateTree();
-										treeitem.clearAll(true);
-										treeitem.dispose();
-										Target target = (Target) parentItem.getData();
-										TreeItem parentParent = parentItem.getParentItem();
-										parentItem.clearAll(true);
-										parentItem.dispose();
-										refreshTree(target, parentParent);
-										setDirtyState(true);
-									}
-								});
-								btnDeleteTarget.setText("Delete Instance");
-						new Label(compositeInstance, SWT.NONE);
-				
-						btnCopyInstance = new Button(compositeInstance, SWT.NONE);
-						btnCopyInstance.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
-						btnCopyInstance.addSelectionListener(new SelectionAdapter() {
-							@Override
-							public void widgetSelected(SelectionEvent arg0) {
-								TreeItem selectedItem = tree.getSelection()[0];
-								if (selectedItem == null) {
-									return;
-								}
-								Target target = (Target) selectedItem.getData();
-								Target parentTarget = (Target) selectedItem.getParentItem().getData();
-								Target newTarget = controller.copyTargetInstance(target, parentTarget, true);
-								// clearTreeAll();
-								// refreshTree(controller.getRootTarget(), null);
-								refreshTree(newTarget, selectedItem.getParentItem());
-								TreeItem t = selectedItem.getParentItem();
-								tree.select(t.getItem(t.getItemCount() - 1));
-								setDirtyState(true);
-							}
-						});
-						btnCopyInstance.setText("Copy Node or Connector");
-						btnCopyInstance.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-						btnCopyInstance.setEnabled(false);
-						new Label(compositeInstance, SWT.NONE);
-				compositeBus.setLayout(new GridLayout(3, false));
-		
-				Label lblSource = new Label(compositeBus, SWT.NONE);
-				lblSource.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-				lblSource.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-				lblSource.setText("Source:");
+
+		btnDeleteTarget = new Button(compositeInstance, SWT.NONE);
+		btnDeleteTarget.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnDeleteTarget.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		btnDeleteTarget.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TreeItem treeitem = tree.getSelection()[0];
+				TreeItem parentItem = treeitem.getParentItem();
+				controller.deleteTarget((Target) treeitem.getData());
+				// clearTreeAll();
+				// controller.updateTree();
+				treeitem.clearAll(true);
+				treeitem.dispose();
+				Target target = (Target) parentItem.getData();
+				TreeItem parentParent = parentItem.getParentItem();
+				parentItem.clearAll(true);
+				parentItem.dispose();
+				refreshTree(target, parentParent);
+				setDirtyState(true);
+			}
+		});
+		btnDeleteTarget.setText("Delete Instance");
+		new Label(compositeInstance, SWT.NONE);
+
+		btnCopyInstance = new Button(compositeInstance, SWT.NONE);
+		btnCopyInstance.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
+		btnCopyInstance.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				TreeItem selectedItem = tree.getSelection()[0];
+				if (selectedItem == null) {
+					return;
+				}
+				Target target = (Target) selectedItem.getData();
+				Target parentTarget = (Target) selectedItem.getParentItem().getData();
+				Target newTarget = controller.copyTargetInstance(target, parentTarget, true);
+				// clearTreeAll();
+				// refreshTree(controller.getRootTarget(), null);
+				refreshTree(newTarget, selectedItem.getParentItem());
+				TreeItem t = selectedItem.getParentItem();
+				tree.select(t.getItem(t.getItemCount() - 1));
+				setDirtyState(true);
+			}
+		});
+		btnCopyInstance.setText("Copy Node or Connector");
+		btnCopyInstance.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		btnCopyInstance.setEnabled(false);
+		new Label(compositeInstance, SWT.NONE);
+		compositeBus.setLayout(new GridLayout(3, false));
+
+		Label lblSource = new Label(compositeBus, SWT.NONE);
+		lblSource.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblSource.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		lblSource.setText("Source:");
 
 		comboSource = new Combo(compositeBus, SWT.NONE);
 		GridData gd_comboSource = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_comboSource.widthHint = 182;
 		comboSource.setLayoutData(gd_comboSource);
 		comboSource.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-		
-				btnAddConnection = new Button(compositeBus, SWT.PUSH);
-				btnAddConnection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-				//btnAddConnection.setBounds(20, 72, 100, 25);
-				//btnAddConnection.setVisible(true);
-				btnAddConnection.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-				btnAddConnection.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						addConnection(false);
-					}
-				});
-				btnAddConnection.setText("Add Connection");
-		
-				Label lblDestination = new Label(compositeBus, SWT.NONE);
-				lblDestination.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-				lblDestination.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-				lblDestination.setText("Destination:");
-		
-				comboDest = new Combo(compositeBus, SWT.NONE);
-				GridData gd_comboDest = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-				gd_comboDest.widthHint = 181;
-				comboDest.setLayoutData(gd_comboDest);
-				comboDest.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-		
-				btnAddCable = new Button(compositeBus, SWT.NONE);
-				btnAddCable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-				btnAddCable.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-				btnAddCable.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						addConnection(true);
-					}
-				});
-				btnAddCable.setText("Add Cable");
-				new Label(compositeBus, SWT.NONE);
-				new Label(compositeBus, SWT.NONE);
-		
-				btnDeleteConnection = new Button(compositeBus, SWT.NONE);
-				btnDeleteConnection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-				btnDeleteConnection.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent arg0) {
-						deleteConnection();
-					}
-				});
-				btnDeleteConnection.setText("Delete");
-				btnDeleteConnection.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+
+		btnAddConnection = new Button(compositeBus, SWT.PUSH);
+		btnAddConnection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		// btnAddConnection.setBounds(20, 72, 100, 25);
+		// btnAddConnection.setVisible(true);
+		btnAddConnection.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		btnAddConnection.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addConnection(false);
+			}
+		});
+		btnAddConnection.setText("Add Connection");
+
+		Label lblDestination = new Label(compositeBus, SWT.NONE);
+		lblDestination.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblDestination.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		lblDestination.setText("Destination:");
+
+		comboDest = new Combo(compositeBus, SWT.NONE);
+		GridData gd_comboDest = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		gd_comboDest.widthHint = 181;
+		comboDest.setLayoutData(gd_comboDest);
+		comboDest.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+
+		btnAddCable = new Button(compositeBus, SWT.NONE);
+		btnAddCable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnAddCable.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		btnAddCable.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addConnection(true);
+			}
+		});
+		btnAddCable.setText("Add Cable");
+		new Label(compositeBus, SWT.NONE);
+		new Label(compositeBus, SWT.NONE);
+
+		btnDeleteConnection = new Button(compositeBus, SWT.NONE);
+		btnDeleteConnection.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		btnDeleteConnection.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				deleteConnection();
+			}
+		});
+		btnDeleteConnection.setText("Delete");
+		btnDeleteConnection.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 
 		sashForm_1 = new SashForm(container, SWT.VERTICAL);
 		GridData gd_sashForm_1 = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
@@ -297,12 +299,24 @@ public class MainDialog extends Dialog {
 		sashForm = new SashForm(sashForm_1, SWT.NONE);
 
 		tree = new Tree(sashForm, SWT.BORDER);
+		tree.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateView();
+			}
+		});
+		tree.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				updateView();
+			}
+		});
 		tree.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				if (tree.getColumnCount() > 0) {
-					tree.getColumn(0).setWidth(tree.getSize().x-25);
-				}				
+					tree.getColumn(0).setWidth(tree.getSize().x - 25);
+				}
 			}
 		});
 		tree.setToolTipText("To add an instance\r\n- click on parent\r\n- choose an instance type\r\n- click add instance");
@@ -315,7 +329,7 @@ public class MainDialog extends Dialog {
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				if (treeBus.getColumnCount() > 0) {
-					treeBus.getColumn(0).setWidth(treeBus.getSize().x-25);
+					treeBus.getColumn(0).setWidth(treeBus.getSize().x - 25);
 				}
 			}
 		});
@@ -330,7 +344,29 @@ public class MainDialog extends Dialog {
 			}
 		});
 
-		table = new Table(sashForm_1, SWT.BORDER | SWT.FULL_SELECTION);
+		table = new Table(sashForm_1, SWT.BORDER | SWT.FULL_SELECTION | SWT.VIRTUAL);
+		table.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Control oldEditor = editor.getEditor();
+				if (oldEditor != null) {
+					oldEditor.dispose();
+				}
+
+				// Identify the selected row
+				TableItem item = (TableItem) e.item;
+				if (item == null)
+					return;
+
+				AttributeTableItem a = (AttributeTableItem) item.getData();
+				
+				Control newEditor = a.getAttribute().getEditor(table, a);
+				
+				newEditor.setFocus();
+				editor.setEditor(newEditor, item, 2);
+				setDirtyState(true);
+			}
+		});
 		table.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -353,16 +389,11 @@ public class MainDialog extends Dialog {
 
 		table.setHeaderVisible(true);
 
-		tree.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateView();
-			}
-		});
+
 		sashForm_1.setWeights(new int[] { 1, 1 });
 
 		controller.init();
-		
+
 		this.setDirtyState(false);
 		updateView();
 		// load file if passed on command line
@@ -372,7 +403,14 @@ public class MainDialog extends Dialog {
 			controller.readXML(mrwFilename);
 			setFilename(mrwFilename);
 		}
-		//container.pack();
+		// container.pack();
+		editor = new TableEditor(table);
+		editor.horizontalAlignment = SWT.LEFT;
+		editor.grabHorizontal = true;
+		editor.grabVertical = true;
+		//editor.minimumHeight = 0;
+		// editor.minimumWidth = 50;
+
 		return container;
 	}
 
@@ -385,7 +423,7 @@ public class MainDialog extends Dialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		parent.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		// @SuppressWarnings("unused")
-		Button btnClearAll = createButton (parent, IDialogConstants.NO_ID, "New", false) ;
+		Button btnClearAll = createButton(parent, IDialogConstants.NO_ID, "New", false);
 		btnClearAll.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnClearAll.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -404,7 +442,7 @@ public class MainDialog extends Dialog {
 			}
 		});
 
-		btnLoadXml = createButton (parent, IDialogConstants.NO_ID, "Open", false) ;
+		btnLoadXml = createButton(parent, IDialogConstants.NO_ID, "Open", false);
 		btnLoadXml.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnLoadXml.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -432,7 +470,7 @@ public class MainDialog extends Dialog {
 		});
 		btnLoadXml.setToolTipText("Loads XML from file");
 
-		btnSaveXml = createButton (parent, IDialogConstants.NO_ID, "Save", false) ;
+		btnSaveXml = createButton(parent, IDialogConstants.NO_ID, "Save", false);
 		btnSaveXml.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnSaveXml.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -455,8 +493,8 @@ public class MainDialog extends Dialog {
 			}
 		});
 		btnSaveXml.setText("Save");
-		
-		btnSaveAs = createButton (parent, IDialogConstants.NO_ID, "Save As...", false) ;
+
+		btnSaveAs = createButton(parent, IDialogConstants.NO_ID, "Save As...", false);
 		btnSaveAs.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -478,7 +516,7 @@ public class MainDialog extends Dialog {
 		btnSaveAs.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnSaveAs.setEnabled(true);
 
-		Button btnImportSDR = createButton (parent, IDialogConstants.NO_ID, "Import SDR", false) ;
+		Button btnImportSDR = createButton(parent, IDialogConstants.NO_ID, "Import SDR", false);
 		btnImportSDR.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -497,9 +535,8 @@ public class MainDialog extends Dialog {
 
 		btnImportSDR.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnImportSDR.setEnabled(true);
-		
-		
-		btnRunChecks = createButton (parent, IDialogConstants.NO_ID, "Run Checks", false) ;
+
+		btnRunChecks = createButton(parent, IDialogConstants.NO_ID, "Run Checks", false);
 		btnRunChecks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -510,11 +547,11 @@ public class MainDialog extends Dialog {
 			}
 		});
 		btnRunChecks.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
-		
-		Button btnSpacer = createButton (parent, IDialogConstants.NO_ID, "Spacer", false) ;
+
+		Button btnSpacer = createButton(parent, IDialogConstants.NO_ID, "Spacer", false);
 		btnSpacer.setVisible(false);
 
-		Button btnForceUpdate = createButton (parent, IDialogConstants.NO_ID, "Force Update", false) ;
+		Button btnForceUpdate = createButton(parent, IDialogConstants.NO_ID, "Force Update", false);
 		btnForceUpdate.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnForceUpdate.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -523,25 +560,26 @@ public class MainDialog extends Dialog {
 				String updateFilename = workingDir + "serverwiz2.update";
 				File updateFile = new File(updateFilename);
 				if (updateFile.delete()) {
-					MessageDialog.openInformation(null, "Force Update","Update will occur upon restart...");
+					MessageDialog.openInformation(null, "Force Update",
+							"Update will occur upon restart...");
 					ServerWizard2.LOGGER.info("Removing update file to force update upon restart.");
 				} else {
-					MessageDialog.openError(null, "Error","Unable to delete serverwiz2.update.  Try deleting manually.");
-					ServerWizard2.LOGGER.severe("Unable to delete serverwiz2.update.");					
+					MessageDialog.openError(null, "Error",
+							"Unable to delete serverwiz2.update.  Try deleting manually.");
+					ServerWizard2.LOGGER.severe("Unable to delete serverwiz2.update.");
 				}
 			}
-		});		
+		});
 
-		
-		Button btnExit = createButton (parent, IDialogConstants.CLOSE_ID, "Exit", false) ;
+		Button btnExit = createButton(parent, IDialogConstants.CLOSE_ID, "Exit", false);
 		btnExit.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 		btnExit.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {			
+			public void widgetSelected(SelectionEvent e) {
 				Button b = (Button) e.getSource();
 				b.getShell().close();
 			}
-		});		
+		});
 	}
 
 	/**
@@ -613,15 +651,26 @@ public class MainDialog extends Dialog {
 			}
 		} else {
 			for (int i = 0; i < s.size(); i++) {
-				comboSource.add(s.get(i).getName());
-				comboSource.setData(s.get(i).getName(), s.get(i));
+				String sch = s.get(i).getTarget().getAttribute("SCHEMATIC_INTERFACE");
+				String cStr = s.get(i).getName();
+				if (!sch.isEmpty()) {
+					cStr = cStr + " (" + sch + ")";
+				}
+				comboSource.add(cStr);
+				comboSource.setData(cStr, s.get(i));
 				if (i == 0) {
 					comboSource.select(0);
 				}
 			}
 			for (int i = 0; i < d.size(); i++) {
-				comboDest.add(d.get(i).getName());
-				comboDest.setData(d.get(i).getName(), d.get(i));
+				String sch = d.get(i).getTarget().getAttribute("SCHEMATIC_INTERFACE");
+				String cStr = d.get(i).getName();
+				if (!sch.isEmpty()) {
+					cStr = cStr + " (" + sch + ")";
+				}
+
+				comboDest.add(cStr);
+				comboDest.setData(cStr, d.get(i));
 				if (i == 0) {
 					comboDest.select(0);
 				}
@@ -632,18 +681,22 @@ public class MainDialog extends Dialog {
 	}
 
 	private void clearTable() {
-		for (int r = 0; r < tableEditor.size(); r++) {
-			TableEditor editor = tableEditor.get(r);
-			editor.getEditor().dispose();
-			editor.dispose();
+		Control oldEditor = editor.getEditor();
+		if (oldEditor != null) {
+			oldEditor.dispose();
 		}
-		tableEditor.removeAllElements();
+		//for (int r = 0; r < tableEditor.size(); r++) {
+		//	TableEditor editor = tableEditor.get(r);
+		//	editor.getEditor().dispose();
+		//	editor.dispose();
+		//}
+		//tableEditor.removeAllElements();
 		table.removeAll();
 	}
 
 	public void updateView() {
 		Target targetInstance = getSelectedTarget();
-		if (targetInstance==null) {
+		if (targetInstance == null) {
 			btnDeleteTarget.setEnabled(false);
 			btnCopyInstance.setEnabled(false);
 			updateConnectionCombos();
@@ -666,11 +719,6 @@ public class MainDialog extends Dialog {
 		refreshConnections(targetInstance);
 		updateConnectionCombos();
 	}
-
-	// TODO: This is ugly because I have to check instance type to know how to
-	// present in table.
-	// Doesn't seem appropriate to have the AttributeValue draw it.
-
 	private void updateAttributes(Target targetInstance) {
 		for (Map.Entry<String, Attribute> entry : targetInstance.getAttributes().entrySet()) {
 
@@ -678,187 +726,7 @@ public class MainDialog extends Dialog {
 			Boolean showAttribute = !attribute.hide;
 
 			if (showAttribute) {
-				if (attribute.getValue() instanceof AttributeValueComplex) {
-					AttributeValueComplex a = (AttributeValueComplex) attribute.getValue();
-					TableItem itemA = new TableItem(table, SWT.NONE);
-					itemA.setText(0, attribute.name);
-					itemA.setText(3, attribute.desc);
-					for (int i = 0; i < a.fields.size(); i++) {
-						TableItem item = new TableItem(table, SWT.NONE);
-						TableEditor editor = new TableEditor(table);
-						tableEditor.add(editor);
-						editor.grabHorizontal = true;
-
-						Field f = a.fields.get(i);
-						if (f.value.equals("")) {
-							f.value = f.defaultv;
-						}
-						item.setText(0, attribute.name);
-						item.setText(1, f.name);
-
-						item.setText(3, f.desc);
-						item.setData(attribute.name, attribute);
-
-						Text text = new Text(table, SWT.NONE);
-						text.setText(f.value);
-						text.setData(f);
-						text.addModifyListener(new ModifyListener() {
-							public void modifyText(ModifyEvent me) {
-								Text text = (Text) me.getSource();
-								Field a = (Field) text.getData();
-								a.value = text.getText();
-								setDirtyState(true);
-							}
-						});
-						editor.setEditor(text, item, 2);
-
-						TableEditor editor2 = new TableEditor(table);
-						tableEditor.add(editor2);
-						editor2.grabHorizontal = true;
-						Text text2 = new Text(table, SWT.LEAD);
-						String ntDesc = attribute.desc.replaceAll("\t+", " ");
-						// ntDesc=ntDesc.replaceAll("^\s+","");
-						text2.setText(ntDesc);
-						text2.setData(a);
-						text2.setToolTipText(ntDesc);
-						editor2.setEditor(text2, item, 3);
-
-					}
-				}
-				if (attribute.getValue() instanceof AttributeValueSimple) {
-					AttributeValueSimple a = (AttributeValueSimple) attribute.getValue();
-					TableItem item = new TableItem(table, SWT.LEFT);
-					item.setText(0, attribute.name);
-
-					if (a.getType().equals("enumeration")) {
-						TableEditor editor = new TableEditor(table);
-						tableEditor.add(editor);
-						editor.grabHorizontal = true;
-						CCombo combo = new CCombo(table, SWT.NONE);
-						combo.setText(a.value);
-						Vector<String> enumList = controller.getEnums(a.name);
-						for (int i = 0; i < enumList.size(); i++) {
-							combo.add(enumList.get(i));
-							combo.setData(a);
-						}
-						combo.addSelectionListener(new SelectionAdapter() {
-							public void widgetSelected(SelectionEvent event) {
-								CCombo c = (CCombo) event.getSource();
-								AttributeValueSimple a = (AttributeValueSimple) c.getData();
-								a.value = c.getText();
-								setDirtyState(true);
-							}
-						});
-
-						editor.setEditor(combo, item, 2);
-					} else {
-						TableEditor editor = new TableEditor(table);
-						tableEditor.add(editor);
-						editor.grabHorizontal = true;
-						Text text = new Text(table, SWT.NONE);
-						text.setText(a.value);
-						text.setData(a);
-
-						text.addModifyListener(new ModifyListener() {
-							public void modifyText(ModifyEvent me) {
-								Text text = (Text) me.getSource();
-								AttributeValueSimple a = (AttributeValueSimple) text.getData();
-								a.value = text.getText();
-								setDirtyState(true);
-							}
-
-						});
-
-						editor.setEditor(text, item, 2);
-
-						// item.setText(2,a.value);
-
-					}
-					item.setText(1, "");
-
-					TableEditor editor = new TableEditor(table);
-					tableEditor.add(editor);
-					editor.grabHorizontal = true;
-					Text text2 = new Text(table, SWT.LEAD);
-					String ntDesc = attribute.desc.replaceAll("\t+", " ");
-					text2.setText(ntDesc);
-					text2.setData(a);
-					text2.setToolTipText(ntDesc);
-					editor.setEditor(text2, item, 3);
-
-					// item.setText(3, attribute.desc);
-					item.setData(attribute.name, attribute);
-				}
-				if (attribute.getValue() instanceof AttributeValueNative) {
-					AttributeValueNative a = (AttributeValueNative) attribute.getValue();
-					TableItem item = new TableItem(table, SWT.NONE);
-					item.setText(0, attribute.name);
-
-					TableEditor editor = new TableEditor(table);
-					tableEditor.add(editor);
-					editor.grabHorizontal = true;
-					Text text = new Text(table, SWT.NONE);
-					text.setText(a.value);
-					text.setData(a);
-
-					text.addModifyListener(new ModifyListener() {
-						public void modifyText(ModifyEvent me) {
-							Text text = (Text) me.getSource();
-							AttributeValueNative a = (AttributeValueNative) text.getData();
-							a.value = text.getText();
-							setDirtyState(true);
-						}
-					});
-					editor.setEditor(text, item, 2);
-					item.setText(1, "");
-
-					TableEditor editor2 = new TableEditor(table);
-					tableEditor.add(editor2);
-					editor2.grabHorizontal = true;
-
-					Text text2 = new Text(table, SWT.LEAD);
-					String ntDesc = attribute.desc.replaceAll("\t+", " ");
-					text2.setText(ntDesc);
-					text2.setData(a);
-					text2.setToolTipText(ntDesc);
-					editor2.setEditor(text2, item, 3);
-					item.setData(attribute.name, attribute);
-				}
-				if (attribute.getValue() instanceof AttributeValueXml) {
-					AttributeValueXml a = (AttributeValueXml) attribute.getValue();
-					TableItem item = new TableItem(table, SWT.NONE);
-					item.setText(0, attribute.name);
-
-					TableEditor editor = new TableEditor(table);
-					tableEditor.add(editor);
-					editor.grabHorizontal = true;
-
-					Text text = new Text(table, SWT.NONE);
-					text.setText(a.value);
-					text.setData(a);
-					text.addModifyListener(new ModifyListener() {
-						public void modifyText(ModifyEvent me) {
-							Text text = (Text) me.getSource();
-							AttributeValueXml a = (AttributeValueXml) text.getData();
-							a.value = text.getText();
-							setDirtyState(true);
-						}
-					});
-					editor.setEditor(text, item, 2);
-					item.setText(1, "");
-
-					TableEditor editor2 = new TableEditor(table);
-					tableEditor.add(editor2);
-					editor2.grabHorizontal = true;
-
-					Text text2 = new Text(table, SWT.LEAD);
-					String ntDesc = attribute.desc.replaceAll("\t+", " ");
-					text2.setText(ntDesc);
-					text2.setData(a);
-					text2.setToolTipText(ntDesc);
-					editor2.setEditor(text2, item, 3);
-					item.setData(attribute.name, attribute);
-				}
+				attribute.createTableRow(table);
 			}
 		}
 	}
@@ -899,10 +767,13 @@ public class MainDialog extends Dialog {
 		if (parentItem == null) {
 			TreeColumn columnName = new TreeColumn(tree, SWT.VIRTUAL);
 			columnName.setText("Instances");
-			columnName.setToolTipText("To add a new instance, choose parent instance.  A list of child instances will appear in Instance Type combo.\r\n"
-					+ "Select and Instance type.  You can optionally enter a custom name.  Then click 'Add Instance' button.");
-			int width = tree.getSize().x-25;
-			if (width==0) { width=300; }
+			columnName
+					.setToolTipText("To add a new instance, choose parent instance.  A list of child instances will appear in Instance Type combo.\r\n"
+							+ "Select and Instance type.  You can optionally enter a custom name.  Then click 'Add Instance' button.");
+			int width = tree.getSize().x - 25;
+			if (width == 0) {
+				width = 300;
+			}
 			columnName.setWidth(width);
 
 			treeitem = new TreeItem(tree, SWT.VIRTUAL | SWT.BORDER);
@@ -950,10 +821,13 @@ public class MainDialog extends Dialog {
 		}
 		TreeColumn columnName = new TreeColumn(treeBus, SWT.VIRTUAL);
 		columnName.setText("Connections");
-		columnName.setToolTipText("To add a new bus, first select an instance of a card in instances view, then choose bus type.\r\n"
-				+ "If a bus is available, then sources and destinations will appear in connections combos.");
-		int width = treeBus.getSize().x-25;
-		if (width==0) { width=300; }
+		columnName
+				.setToolTipText("To add a new bus, first select an instance of a card in instances view, then choose bus type.\r\n"
+						+ "If a bus is available, then sources and destinations will appear in connections combos.");
+		int width = treeBus.getSize().x - 25;
+		if (width == 0) {
+			width = 300;
+		}
 		columnName.setWidth(width);
 		TreeMap<Target, Vector<Connection>> busses = target.getBusses();
 		for (Map.Entry<Target, Vector<Connection>> entry : busses.entrySet()) {
@@ -1028,7 +902,7 @@ public class MainDialog extends Dialog {
 
 	public void setDirtyState(Boolean dirty) {
 		this.dirty = dirty;
-		if (this.btnSaveXml!=null) {
+		if (this.btnSaveXml != null) {
 			this.btnSaveXml.setEnabled(dirty);
 		}
 		if (dirty) {

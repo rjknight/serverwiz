@@ -2,6 +2,10 @@ package com.ibm.ServerWizard2;
 
 import java.io.Writer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -16,6 +20,7 @@ public class Attribute implements java.io.Serializable {
 	public Boolean writeable = false;
 	public Persistency persistency = Persistency.NO_PERSISTENCY;
 	public Boolean hide = false;
+	private Boolean bitmask = false;
 
 	public enum Persistency {
 		NO_PERSISTENCY, VOLATILE_ZEROED, NON_VOLATILE, VOLATILE
@@ -32,6 +37,7 @@ public class Attribute implements java.io.Serializable {
 		this.writeable = a.writeable;
 		this.inherited = a.inherited;
 		this.hide = a.hide;
+		this.bitmask = a.bitmask;
 		
 		if (a.value instanceof AttributeValueComplex) {
 			this.value = new AttributeValueComplex((AttributeValueComplex)a.value);
@@ -54,7 +60,10 @@ public class Attribute implements java.io.Serializable {
 	public AttributeValue getValue() {
 		return value;
 	}
-
+	
+	public Boolean isBitmask() {
+		return bitmask;
+	}
 	public String toString() {
 		String rtn="Attribute: "+name+" = ";
 		rtn="Attribute: "+name+" = "+value.toString()+" inherited="+this.inherited;
@@ -92,6 +101,10 @@ public class Attribute implements java.io.Serializable {
 		String p = SystemModel.getElement(attribute,"persistency");
 		if (!p.isEmpty()) { setPersistence(p); }
 		
+		if (SystemModel.isElementDefined(attribute,"bitmask")) {
+			bitmask=true;
+		}
+
 		if (SystemModel.isElementDefined(attribute,"readable")) {
 			readable=true;
 		}
@@ -134,5 +147,42 @@ public class Attribute implements java.io.Serializable {
 		value.writeInstanceXML(out);
 		out.write("\t</attribute>\n");
 	}
+	public Control getEditor(Table table,AttributeTableItem item) {
+		return value.getEditor(table,item);
+	}
+	public void createTableRow(Table table) {
+		TableItem item = new TableItem(table, SWT.NONE);
+		AttributeTableItem aItem = new AttributeTableItem();
+		item.setText(0, this.name);
+		item.setText(1,"");
+		item.setText(2,value.getValue());
+		String ntDesc = this.desc.replaceAll("\t+", " ");
+		item.setText(3,ntDesc);
+		item.setData(aItem);
+		
+		aItem.setAttributeValue(value);
+		aItem.setItem(item);
 
+		if (value instanceof AttributeValueComplex) {
+			AttributeValueComplex complexValue = (AttributeValueComplex)value;
+			for (Field field : complexValue.fields) {
+				TableItem itemField = new TableItem(table, SWT.NONE);
+				AttributeTableItem cItem = new AttributeTableItem();
+				itemField.setText(0,this.name);
+				itemField.setText(1,field.name);
+				if (field.value.isEmpty()) {
+					field.value=field.defaultv;
+				}
+				itemField.setText(2, field.value);
+				String fieldDesc = field.desc.replaceAll("\t+", " ");
+				itemField.setText(3,fieldDesc);
+				itemField.setData(cItem);
+				
+				cItem.setAttributeValue(value);
+				cItem.setItem(itemField);
+				cItem.setField(field);
+			}
+		}
+	}
+	
 }

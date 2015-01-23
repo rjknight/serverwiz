@@ -3,6 +3,17 @@ package com.ibm.ServerWizard2;
 import java.io.Writer;
 import java.util.Vector;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -97,6 +108,41 @@ public class AttributeValueComplex extends AttributeValue {
 			fields.add(f);
 		}
 	}
-	
+	@Override
+	public Control getEditor(Table table,AttributeTableItem item) {
+		Control control;
+		if (item.getField().type.equals("boolean")) {
+			CCombo combo = new CCombo(table, SWT.NONE);
+			combo.setText(item.getField().value);
+			combo.add("true"); 
+			combo.setData(item);
+			combo.add("false");
+			combo.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent event) {
+					CCombo c = (CCombo) event.getSource();
+					AttributeTableItem a = (AttributeTableItem) c.getData();
+					a.getField().value=c.getText();
+					a.getItem().setText(2, a.getField().value);
+				}
+			});
+			control=combo;
+		} else {
+			Text text = new Text(table, SWT.NONE);
+			text.setData(item);
+			text.setText(item.getField().value);
+			text.setSelection(text.getText().length());
+			text.addModifyListener(new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					Text text = (Text) e.getSource();
+					AttributeTableItem a = (AttributeTableItem) text.getData();
+					a.getField().value = text.getText();
+					a.getItem().setText(2, a.getField().value);
+				}
+			});
+			control=text;
+		}
+		return control;
+	}	
 
 }

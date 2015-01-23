@@ -75,7 +75,14 @@ public class TargetWizardController {
 		}
 		return model.enumerations.get(e).enumList;
 	}
+	public Boolean isEnum(String e) {
+		if (model.enumerations.get(e)==null) {
+			return false;
+		}
+		return true;
+	}
 
+	
 	public void deleteTarget(Target target) {
 		model.deleteTarget(target, model.rootTarget);
 	}
@@ -170,10 +177,10 @@ public class TargetWizardController {
 				ipmiSensors = new Vector<String>();
 				ipmiAttr.put(t, ipmiSensors);
 			}
-			//ipmiSensors.add(String.format("0x%02x", sdr.getEntityId())+","+
-			//		String.format("0x%02x", sdr.getSensorId()));
-			ipmiSensors.add(sdr.getEntityName()+","+
+			ipmiSensors.add(String.format("0x%02x", sdr.getEntityId())+","+
 					String.format("0x%02x", sdr.getSensorId()));
+			//ipmiSensors.add(sdr.getEntityName()+","+
+			//		String.format("0x%02x", sdr.getSensorId()));
 
 			System.out.println(t.getName()+","+ipmiSensors);
 		}
@@ -188,6 +195,7 @@ public class TargetWizardController {
 				ipmiStr = ipmiStr+"0xFF,0xFF,";
 			}
 			t.setAttributeValue("IPMI_SENSORS", ipmiStr);
+			
 		}
 	}
 	public void loadAttributes(String filename) {

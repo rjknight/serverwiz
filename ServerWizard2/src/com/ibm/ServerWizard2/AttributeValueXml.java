@@ -2,6 +2,9 @@ package com.ibm.ServerWizard2;
 
 import java.io.Writer;
 
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.w3c.dom.Element;
 
 public class AttributeValueXml extends AttributeValue {
@@ -68,4 +71,9 @@ public class AttributeValueXml extends AttributeValue {
 		this.value=n.value;
 		this.name=n.name;
 	}
+	@Override
+	public Control getEditor(Table table, AttributeTableItem item) {
+		
+		return null;
+	}	
 }

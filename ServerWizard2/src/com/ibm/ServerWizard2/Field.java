@@ -1,5 +1,7 @@
 package com.ibm.ServerWizard2;
 
+import org.eclipse.swt.widgets.TableItem;
+
 public class Field {
 	public String name="";
 	public String desc="";
@@ -7,6 +9,8 @@ public class Field {
 	public String bits="";
 	public String defaultv="";
 	public String value="";
+	public TableItem item;
+	
 	public Field() {
 	
 	}

@@ -215,17 +215,19 @@ public class SystemModel {
 		}
 	}
 
-	public void writeEnumeration(Writer out, String enumeration) throws Exception {
-		Enumerator e = enumerations.get(enumeration);
-		out.write("<enumerationType>\n");
-		out.write("\t<id>" + enumeration + "</id>\n");
-		for (Map.Entry<String, String> entry : e.enumValues.entrySet()) {
-			out.write("\t\t<enumerator>\n");
-			out.write("\t\t<name>" + entry.getKey() + "</name>\n");
-			out.write("\t\t<value>" + entry.getValue() + "</value>\n");
-			out.write("\t\t</enumerator>\n");
+	public void writeEnumeration(Writer out) throws Exception {
+		for (String enumeration : enumerations.keySet()) {
+			Enumerator e = enumerations.get(enumeration);
+			out.write("<enumerationType>\n");
+			out.write("\t<id>" + enumeration + "</id>\n");
+			for (Map.Entry<String, String> entry : e.enumValues.entrySet()) {
+				out.write("\t\t<enumerator>\n");
+				out.write("\t\t<name>" + entry.getKey() + "</name>\n");
+				out.write("\t\t<value>" + entry.getValue() + "</value>\n");
+				out.write("\t\t</enumerator>\n");
+			}
+			out.write("</enumerationType>\n");
 		}
-		out.write("</enumerationType>\n");
 	}
 
 	// Writes MRW to file
@@ -233,9 +235,9 @@ public class SystemModel {
 		Writer out = new BufferedWriter(new FileWriter(filename));
 		out.write("<targetInstances>\n");
 		out.write("<version>" + ServerWizard2.VERSION + "</version>\n");
-		writeEnumeration(out, "TYPE");
-		writeEnumeration(out, "CLASS");
-		writeEnumeration(out, "MRU_PREFIX");
+		writeEnumeration(out);
+		//writeEnumeration(out, "CLASS");
+		//writeEnumeration(out, "MRU_PREFIX");
 
 		for (Target target : targetList) {
 			target.writeInstanceXML(out);
@@ -333,6 +335,10 @@ public class SystemModel {
 			Attribute a = new Attribute();
 			a.readModelXML(t);
 			attributes.put(a.name, a);
+			
+			if (a.getValue().getType().equals("enumeration")) {
+				a.getValue().enumerator=enumerations.get(a.name);
+			}
 		}
 	}
 
