@@ -287,7 +287,7 @@ public class MainDialog extends Dialog {
 				deleteConnection();
 			}
 		});
-		btnDeleteConnection.setText("Delete");
+		btnDeleteConnection.setText("Delete Connection");
 		btnDeleteConnection.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
 
 		sashForm_1 = new SashForm(container, SWT.VERTICAL);
@@ -889,7 +889,9 @@ public class MainDialog extends Dialog {
 		Target target = (Target) selectedTarget.getData();
 		Target busTarget = (Target) selectedBus.getParentItem().getData();
 		controller.deleteConnection(target, busTarget, conn);
-		refreshConnections(target);
+		//TreeItem busType = selectedBus.getParentItem();
+		//refreshConnections(target);
+		selectedBus.dispose();
 		setDirtyState(true);
 	}
 

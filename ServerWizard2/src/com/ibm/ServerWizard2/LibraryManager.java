@@ -65,12 +65,12 @@ public class LibraryManager {
 			String swUrl = "https://raw.githubusercontent.com/nkskjames/serverwiz/master/ServerWizard2/";
 
 			LibraryFile f1 = new LibraryFile();
-			f1.init(hbUrl + "attribute_types.xml", workingDir,
+			f1.init(swUrl + "xml/attribute_types.xml", workingDir,
 					LibraryFile.FileTypes.ATTRIBUTE_TYPE_XML);
 			files.add(f1);
 
 			LibraryFile f2 = new LibraryFile();
-			f2.init(hbUrl + "attribute_types_hb.xml", workingDir,
+			f2.init(swUrl + "xml/attribute_types_hb.xml", workingDir,
 					LibraryFile.FileTypes.ATTRIBUTE_TYPE_XML);
 			files.add(f2);
 
