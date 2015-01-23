@@ -12,7 +12,7 @@
 			<default>SYS</default>
 		</attribute>
 		<attribute>
-			<id>CDM_POLICIES</id>
+			<id>CDM_POLICIES_BITMASK</id>
 			<default></default>
 		</attribute>
 		<attribute>
@@ -670,6 +670,14 @@
 			<default>PROCESSOR</default>
 		</attribute>		
 		<attribute>
+			<id>FABRIC_NODE_ID</id>
+			<default>0</default>
+		</attribute>		
+		<attribute>
+			<id>FABRIC_CHIP_ID</id>
+			<default>0</default>
+		</attribute>		
+		<attribute>
 			<id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
 			<default>0x000018F4,0x000018F4
 			</default>
@@ -1212,7 +1220,7 @@
 		</attribute>
 		<attribute>
 			<id>DMI_REFCLOCK_SWIZZLE</id>
-			<default>0</default>
+			<default></default>
 		</attribute>
 		<attribute>
 			<id>EI_BUS_TX_LANE_INVERT</id>
@@ -1308,7 +1316,7 @@
 		</attribute>
 	<attribute>
 		<id>I2C_BUS_SPEED_ARRAY</id>
-		<default>400,0,0,0,0,0</default>
+		<default>400,400,0,0,0,0</default>
 	</attribute>		
 	</targetType>
 
@@ -1976,7 +1984,7 @@
 		<parent_type>card-daughtercard</parent_type>
 		<attribute>
 			<id>VPD_TYPE</id>
-			<default>CVPD</default>
+			<default>PVPD</default>
 		</attribute>
 		<attribute>
 			<id>BYTE_ADDRESS_OFFSET</id>
@@ -2191,7 +2199,7 @@
 		</attribute>
 		<attribute>
 			<id>DMI_REFCLOCK_SWIZZLE</id>
-			<default>0</default>
+			<default></default>
 		</attribute>
 		<attribute>
 			<id>PROC_TX_LANE_INVERT</id>
@@ -2244,6 +2252,10 @@
 			<id>CLASS</id>
 			<default>BUS</default>
 		</attribute>
+		<attribute>
+			<id>ISDIMM_MBVPD_INDEX</id>
+			<default>0</default>
+		</attribute>		
 	</targetType>
 	<targetType>
 		<id>unit-logic_assoc-generic</id>
@@ -2265,5 +2277,4 @@
 			<default>NA</default>
 		</attribute>
 	</targetType>
-
 </targetTypes>

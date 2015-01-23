@@ -198,7 +198,7 @@
 			<value>3</value>
 		</enumerator>
 		<enumerator>
-			<name>BOARD</name>
+			<name>PVPD</name>
 			<value>4</value>
 		</enumerator>
 		<enumerator>
@@ -367,6 +367,7 @@
 		<persistency>non-volatile</persistency>
 		<readable />
 		<hasStringConversion />
+		<serverwizHide/>
 	</attribute>
 	<attribute>
 		<id>LOCATION_CODE</id>
@@ -913,5 +914,51 @@
 		<persistency>non-volatile</persistency>
 		<readable />
 	</attribute>
+<attribute>
+    <id>CDM_POLICIES_BITMASK</id>
+    <description>
+        Cec Degraded Mode Policy flags
+        Use the CDM_POLICIES enum to decode.
+        If the appropriate bit is 1 then the policy mode is enabled,
+        and those type of Guard records are disabled.
+    </description>
+    <complexType>
+          <field>
+            <name>MANUFACTURING_DISABLED</name>
+            <description>
+        MFG_Guard policy:
+        Used in MFG only to prevent and disable the following:
+        . Storing or creation of new Guard records from Diagnostic or other
+            faults through error logs. This is all domains, CEC
+            processor/memory, VPD, FSP, etc.
+        . Storing or creation of Manual Guard record from user.
+            NOTE: this does not stop FCO.
+        . Using an already stored System or Manual Guard record from
+            deconfiguring resources. This is all domains, CEC
+            processor/memory, VPD, FSP, etc.            
+            </description>
+            <type>boolean</type>
+            <bits>1</bits>
+        </field>
+        <field>
+            <name>PREDICTIVE_DISABLED</name>
+            <description>
+        Predictive_Guard policy:
+        Used in Field or development to prevent and disable the following:
+        . Storing or creation of new Guard records from diagnostics or other
+            faults through error logs with the error_type of Predictive.
+        . Using an already stored System Guard record with error_type of
+            Predictive from deconfiguring resources.
+            </description>
+            <type>boolean</type>
+            <bits>1</bits>
+         </field>            
+         <default>0</default>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <bitmask/>
+</attribute>
 
 </attributes>

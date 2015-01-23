@@ -403,7 +403,7 @@
 		</attribute>
 		<attribute>
 			<id>SCHEMATIC_INTERFACE</id>
-			<default>M0 DMI C</default>
+			<default>M1 DMI C</default>
 		</attribute>
 	</targetInstance>
 	<targetInstance>
@@ -415,7 +415,7 @@
 		</attribute>
 		<attribute>
 			<id>SCHEMATIC_INTERFACE</id>
-			<default>M0 DMI D</default>
+			<default>M1 DMI D</default>
 		</attribute>
 	</targetInstance>
 	<targetInstance>
@@ -427,7 +427,7 @@
 		</attribute>
 		<attribute>
 			<id>SCHEMATIC_INTERFACE</id>
-			<default>M0 DMI C</default>
+			<default>M1 DMI A</default>
 		</attribute>
 	</targetInstance>
 	<targetInstance>
@@ -439,7 +439,7 @@
 		</attribute>
 		<attribute>
 			<id>SCHEMATIC_INTERFACE</id>
-			<default>M0 DMI C</default>
+			<default>M1 DMI B</default>
 		</attribute>
 	</targetInstance>
 
@@ -452,7 +452,7 @@
 		</attribute>
 		<attribute>
 			<id>SCHEMATIC_INTERFACE</id>
-			<default>M1 DMI C</default>
+			<default>M0 DMI C</default>
 		</attribute>
 	</targetInstance>
 	<targetInstance>
@@ -464,7 +464,7 @@
 		</attribute>
 		<attribute>
 			<id>SCHEMATIC_INTERFACE</id>
-			<default>M1 DMI D</default>
+			<default>M0 DMI D</default>
 		</attribute>
 	</targetInstance>
 	<targetInstance>
@@ -679,7 +679,7 @@
 		</attribute>
 		<attribute>
 			<id>I2C_PORT</id>
-			<default>0x00</default>
+			<default>0x02</default>
 		</attribute>
 		<attribute>
 			<id>I2C_ENGINE</id>
@@ -961,6 +961,15 @@
 		<child_id>io-5</child_id>
 		<child_id>io-6</child_id>
 		<child_id>io-7</child_id>
+		<child_id>io1-0</child_id>
+		<child_id>io1-1</child_id>
+		<child_id>io1-2</child_id>
+		<child_id>io1-3</child_id>
+		<child_id>io1-4</child_id>
+		<child_id>io1-5</child_id>
+		<child_id>io1-6</child_id>
+		<child_id>io1-7</child_id>
+
 	</targetInstance>
 	<targetInstance>
 		<type>unit-gpio-generic</type>
@@ -1059,6 +1068,104 @@
 			<default>IO7</default>
 		</attribute>
 	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-0</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>8</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.0</default>
+		</attribute>
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-1</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>9</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.1</default>
+		</attribute>
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-2</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>10</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.2</default>
+		</attribute>
+
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-3</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>11</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.3</default>
+		</attribute>
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-4</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>12</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.4</default>
+		</attribute>
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-5</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>13</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.5</default>
+		</attribute>
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-6</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>14</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.6</default>
+		</attribute>
+	</targetInstance>
+	<targetInstance>
+		<type>unit-gpio-generic</type>
+		<id>io1-7</id>
+		<attribute>
+			<id>CHIP_UNIT</id>
+			<default>15</default>
+		</attribute>
+		<attribute>
+			<id>SCHEMATIC_INTERFACE</id>
+			<default>IO1.7</default>
+		</attribute>
+	</targetInstance>
+
 
 	<!-- PCIe cards -->
 	<targetInstance>
