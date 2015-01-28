@@ -30,7 +30,7 @@
 		<attribute>
 			<id>ENTITY_ID</id>
 			<default>SYSTEM_BOARD,OS,BIOS,POWER_UNIT,SYSTEM_CHASSIS</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>EXECUTION_PLATFORM</id>
 			<default>1</default>
@@ -120,7 +120,7 @@
 		</attribute>
 		<attribute>
 			<id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
-			<default>96</default>
+			<default>32</default>
 		</attribute>
 		<attribute>
 			<id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
@@ -128,7 +128,7 @@
 		</attribute>
 		<attribute>
 			<id>MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-			<default>5000</default>
+			<default>1500</default>
 		</attribute>
 		<attribute>
 			<id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
@@ -201,6 +201,10 @@
 		<attribute>
 			<id>PROC_VRM_VOFFSET_VCS</id>
 			<default></default>
+		</attribute>
+		<attribute>
+			<id>MRW_POWER_CONTROL_REQUESTED</id>
+			<default>NONE</default>
 		</attribute>
 		<attribute>
 			<id>MEM_MIRROR_PLACEMENT_POLICY</id>
@@ -384,7 +388,7 @@
 		</attribute>
 		<attribute>
 			<id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
-			<default>0.85</default>
+			<default>85</default>
 		</attribute>
 		<attribute>
 			<id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
@@ -603,7 +607,7 @@
 		<attribute>
 			<id>BUS_TYPE</id>
 			<default>NA</default>
-		</attribute>	
+		</attribute>
 	</targetType>
 	<!-- Cards -->
 
@@ -664,19 +668,19 @@
 			<id>IPMI_SENSORS</id>
 			<default>0x0700,0x07,0x0800,0x04,0x0900,0x05,0x0a00,0x08,0x0b00,0x09,0x0c00,0x06,0x0d00,0x00,0x0e00,0xFF,0x0F00,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF
 			</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>ENTITY_ID</id>
 			<default>PROCESSOR</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>FABRIC_NODE_ID</id>
 			<default>0</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>FABRIC_CHIP_ID</id>
 			<default>0</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
 			<default>0x000018F4,0x000018F4
@@ -776,7 +780,7 @@
 		<attribute>
 			<id>TYPE</id>
 			<default>PROC</default>
-		</attribute>			
+		</attribute>
 		<attribute>
 			<id>PROC_DCM_INSTALLED</id>
 			<default>0</default>
@@ -851,90 +855,215 @@
 		</attribute>
 		<attribute>
 			<id>PCI_BASE_ADDRS_32</id>
-			<default>4,0x0003FF8000000000,0x800000000,0x200000000,0x80000000</default>
+			<default>4,0x0003FF8000000000,0x800000000,0x200000000,0x80000000
+			</default>
 		</attribute>
 		<attribute>
 			<id>PCI_BASE_ADDRS_64</id>
-			<default>4,0x0003D00000000000,0x10000000000,0x4000000000,0x1000000000</default>
+			<default>4,0x0003D00000000000,0x10000000000,0x4000000000,0x1000000000
+			</default>
 		</attribute>
 		<attribute>
 			<id>RNG_BASE_ADDR</id>
 			<default>1,0x0003FFFF40000000,0x4000,0x1000,0</default>
-		</attribute> 
+		</attribute>
 		<attribute>
 			<id>IBSCOM_PROC_BASE_ADDR</id>
 			<default>1,0x0003E00000000000,0x40000000000,0x10000000000,0</default>
-		</attribute> 		
+		</attribute>
 		<attribute>
 			<id>EEPROM_SBE_BACKUP_INFO</id>
 			<default>
-				<field><id>byteAddrOffset</id><value>0x02</value></field>
-				<field><id>devAddr</id><value>0xA2</value></field>
-				<field><id>engine</id><value>0</value></field>
-				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
-				<field><id>port</id><value>1</value></field>
-				<field><id>writeCycleTime</id><value>0x05</value></field>
-				<field><id>writePageSize</id><value>0x80</value></field>
+				<field>
+					<id>byteAddrOffset</id>
+					<value>0x02</value>
+				</field>
+				<field>
+					<id>devAddr</id>
+					<value>0xA2</value>
+				</field>
+				<field>
+					<id>engine</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>i2cMasterPath</id>
+					<value>physical:sys-0/node-0/proc-0</value>
+				</field>
+				<field>
+					<id>maxMemorySizeKB</id>
+					<value>0x40</value>
+				</field>
+				<field>
+					<id>port</id>
+					<value>1</value>
+				</field>
+				<field>
+					<id>writeCycleTime</id>
+					<value>0x05</value>
+				</field>
+				<field>
+					<id>writePageSize</id>
+					<value>0x80</value>
+				</field>
 			</default>
 		</attribute>
 		<attribute>
 			<id>EEPROM_SBE_PRIMARY_INFO</id>
 			<default>
-				<field><id>byteAddrOffset</id><value>0x02</value></field>
-				<field><id>devAddr</id><value>0xA2</value></field>
-				<field><id>engine</id><value>0</value></field>
-				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
-				<field><id>port</id><value>0</value></field>
-				<field><id>writeCycleTime</id><value>0x05</value></field>
-				<field><id>writePageSize</id><value>0x80</value></field>
+				<field>
+					<id>byteAddrOffset</id>
+					<value>0x02</value>
+				</field>
+				<field>
+					<id>devAddr</id>
+					<value>0xA2</value>
+				</field>
+				<field>
+					<id>engine</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>i2cMasterPath</id>
+					<value>physical:sys-0/node-0/proc-0</value>
+				</field>
+				<field>
+					<id>maxMemorySizeKB</id>
+					<value>0x40</value>
+				</field>
+				<field>
+					<id>port</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>writeCycleTime</id>
+					<value>0x05</value>
+				</field>
+				<field>
+					<id>writePageSize</id>
+					<value>0x80</value>
+				</field>
 			</default>
 		</attribute>
 		<attribute>
 			<id>EEPROM_VPD_BACKUP_INFO</id>
 			<default>
-				<field><id>byteAddrOffset</id><value>0x02</value></field>
-				<field><id>devAddr</id><value>0xA0</value></field>
-				<field><id>engine</id><value>0</value></field>
-				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
-				<field><id>port</id><value>1</value></field>
-				<field><id>writeCycleTime</id><value>0x05</value></field>
-				<field><id>writePageSize</id><value>0x80</value></field>
+				<field>
+					<id>byteAddrOffset</id>
+					<value>0x02</value>
+				</field>
+				<field>
+					<id>devAddr</id>
+					<value>0xA0</value>
+				</field>
+				<field>
+					<id>engine</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>i2cMasterPath</id>
+					<value>physical:sys-0/node-0/proc-0</value>
+				</field>
+				<field>
+					<id>maxMemorySizeKB</id>
+					<value>0x40</value>
+				</field>
+				<field>
+					<id>port</id>
+					<value>1</value>
+				</field>
+				<field>
+					<id>writeCycleTime</id>
+					<value>0x05</value>
+				</field>
+				<field>
+					<id>writePageSize</id>
+					<value>0x80</value>
+				</field>
 			</default>
 		</attribute>
 		<attribute>
 			<id>EEPROM_VPD_FRU_INFO</id>
 			<default>
-				<field><id>byteAddrOffset</id><value>0x02</value></field>
-				<field><id>devAddr</id><value>0xA0</value></field>
-				<field><id>engine</id><value>0</value></field>
-				<field><id>fruId</id><value>0++</value></field>
-				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
-				<field><id>port</id><value>0</value></field>
-				<field><id>writeCycleTime</id><value>0x05</value></field>
-				<field><id>writePageSize</id><value>0x80</value></field>
+				<field>
+					<id>byteAddrOffset</id>
+					<value>0x02</value>
+				</field>
+				<field>
+					<id>devAddr</id>
+					<value>0xA0</value>
+				</field>
+				<field>
+					<id>engine</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>fruId</id>
+					<value>0++</value>
+				</field>
+				<field>
+					<id>i2cMasterPath</id>
+					<value>physical:sys-0/node-0/proc-0</value>
+				</field>
+				<field>
+					<id>maxMemorySizeKB</id>
+					<value>0x40</value>
+				</field>
+				<field>
+					<id>port</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>writeCycleTime</id>
+					<value>0x05</value>
+				</field>
+				<field>
+					<id>writePageSize</id>
+					<value>0x80</value>
+				</field>
 			</default>
 		</attribute>
 		<attribute>
 			<id>EEPROM_VPD_PRIMARY_INFO</id>
 			<default>
-				<field><id>byteAddrOffset</id><value>0x02</value></field>
-				<field><id>devAddr</id><value>0xA0</value></field>
-				<field><id>engine</id><value>0</value></field>
-				<field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-				<field><id>maxMemorySizeKB</id><value>0x40</value></field>
-				<field><id>port</id><value>0</value></field>
-				<field><id>writeCycleTime</id><value>0x05</value></field>
-				<field><id>writePageSize</id><value>0x80</value></field>
+				<field>
+					<id>byteAddrOffset</id>
+					<value>0x02</value>
+				</field>
+				<field>
+					<id>devAddr</id>
+					<value>0xA0</value>
+				</field>
+				<field>
+					<id>engine</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>i2cMasterPath</id>
+					<value>physical:sys-0/node-0/proc-0</value>
+				</field>
+				<field>
+					<id>maxMemorySizeKB</id>
+					<value>0x40</value>
+				</field>
+				<field>
+					<id>port</id>
+					<value>0</value>
+				</field>
+				<field>
+					<id>writeCycleTime</id>
+					<value>0x05</value>
+				</field>
+				<field>
+					<id>writePageSize</id>
+					<value>0x80</value>
+				</field>
 			</default>
 		</attribute>
-	<attribute>
-		<id>I2C_BUS_SPEED_ARRAY</id>
-		<default>1000,1000,0,0,0,0</default>
-	</attribute>		
+		<attribute>
+			<id>I2C_BUS_SPEED_ARRAY</id>
+			<default>1000,1000,0,0,0,0</default>
+		</attribute>
 	</targetType>
 	<targetType>
 		<id>unit-ex-power8</id>
@@ -1060,10 +1189,6 @@
 		</attribute>
 		<attribute>
 			<id>IOP_NUM</id>
-			<default>1</default>
-		</attribute>
-		<attribute>
-			<id>PCIE_CONFIG_NUM</id>
 			<default>1</default>
 		</attribute>
 	</targetType>
@@ -1232,7 +1357,8 @@
 		</attribute>
 		<attribute>
 			<id>IBSCOM_MCS_BASE_ADDR</id>
-			<default>0x0003E00000000000,0x40000000000,0x10000000000,0x2000000000</default>
+			<default>0x0003E00000000000,0x40000000000,0x10000000000,0x2000000000
+			</default>
 		</attribute>
 	</targetType>
 
@@ -1314,10 +1440,10 @@
 		<attribute>
 			<id>MSS_VOLT_OVERRIDE</id>
 		</attribute>
-	<attribute>
-		<id>I2C_BUS_SPEED_ARRAY</id>
-		<default>400,400,0,0,0,0</default>
-	</attribute>		
+		<attribute>
+			<id>I2C_BUS_SPEED_ARRAY</id>
+			<default>400,400,0,0,0,0</default>
+		</attribute>
 	</targetType>
 
 	<!-- Centaur L4 -->
@@ -1385,7 +1511,7 @@
 			<id>IPMI_SENSORS</id>
 			<default>0x0700,0x07,0x0800,0x04,0x0900,0x05,0x0a00,0x08,0x0b00,0x09,0x0c00,0x06,0x0d00,0x00,0x0e00,0xFF,0x0F00,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF,0xFFFF,0xFF
 			</default>
-		</attribute>		
+		</attribute>
 	</targetType>
 
 
@@ -1396,7 +1522,7 @@
 		<attribute>
 			<id>MODEL</id>
 			<default>JEDEC</default>
-		</attribute>	
+		</attribute>
 	</targetType>
 
 	<targetType>
@@ -1937,7 +2063,7 @@
 		<attribute>
 			<id>BYTE_ADDRESS_OFFSET</id>
 			<default>2</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>MEMORY_SIZE_IN_KB</id>
 			<default></default>
@@ -1976,7 +2102,7 @@
 			<id>WRITE_PAGE_SIZE</id>
 			<default>32</default>
 		</attribute>
-	</targetType>	
+	</targetType>
 	<targetType>
 		<id>chip-planar_vpd-device</id>
 		<parent>chip-vpd-device</parent>
@@ -2002,7 +2128,7 @@
 			<id>WRITE_PAGE_SIZE</id>
 			<default>32</default>
 		</attribute>
-	</targetType>	
+	</targetType>
 	<targetType>
 		<id>chip-spd-device</id>
 		<parent>chip-vpd-device</parent>
@@ -2013,7 +2139,7 @@
 		<attribute>
 			<id>MRW_TYPE</id>
 			<default>SPD</default>
-		</attribute>		
+		</attribute>
 		<attribute>
 			<id>BYTE_ADDRESS_OFFSET</id>
 			<default>0x01</default>
@@ -2030,7 +2156,7 @@
 			<id>WRITE_PAGE_SIZE</id>
 			<default>0x00</default>
 		</attribute>
-	</targetType>	
+	</targetType>
 
 	<targetType>
 		<id>unit-pcie-endpoint</id>
@@ -2091,7 +2217,7 @@
 	</targetType>
 
 	<targetType>
-		<id>unit-pciconfig-venice</id>
+		<id>unit-pciconfig0-venice</id>
 		<parent>unit</parent>
 		<attribute>
 			<id>MODEL</id>
@@ -2100,6 +2226,47 @@
 		<attribute>
 			<id>MRW_TYPE</id>
 			<default>PCI_CONFIG</default>
+		</attribute>
+		<attribute>
+			<id>PCIE_CONFIG_NUM</id>
+			<default>0x00</default>	
+		</attribute>
+	<attribute>
+		<id>PCIE_LANE_SWAP_TABLE</id>
+		<default></default>
+	</attribute>		
+		
+	</targetType>
+		<targetType>
+		<id>unit-pciconfig1-venice</id>
+		<parent>unit</parent>
+		<attribute>
+			<id>MODEL</id>
+			<default>VENICE</default>
+		</attribute>
+		<attribute>
+			<id>MRW_TYPE</id>
+			<default>PCI_CONFIG</default>
+		</attribute>
+		<attribute>
+			<id>PCIE_CONFIG_NUM</id>
+			<default>0x01</default>
+		</attribute>
+	<attribute>
+		<id>PCIE_LANE_SWAP_TABLE</id>
+		<default></default>
+	</attribute>		
+	</targetType>
+	<targetType>
+		<id>unit-pciconfigs-venice</id>
+		<parent>unit</parent>
+		<attribute>
+			<id>MODEL</id>
+			<default>VENICE</default>
+		</attribute>
+		<attribute>
+			<id>MRW_TYPE</id>
+			<default>PCI_CONFIGS</default>
 		</attribute>
 	</targetType>
 	<!-- Bus targets -->
@@ -2167,16 +2334,12 @@
 			<default>BUS</default>
 		</attribute>
 		<attribute>
-			<id>ENABLE_CAPI</id>
-			<default>1</default>
-		</attribute>
-		<attribute>
-			<id>LANE_SWAP</id>
-			<default>1</default>
+			<id>PCIE_SWAP_CLKS</id>
+			<default>0</default>
 		</attribute>
 		<attribute>
 			<id>LANE_REVERSAL</id>
-			<default>1</default>
+			<default>00</default>
 		</attribute>
 		<attribute>
 			<id>PROC_PCIE_LANE_EQUALIZATION</id>
@@ -2255,7 +2418,7 @@
 		<attribute>
 			<id>ISDIMM_MBVPD_INDEX</id>
 			<default>0</default>
-		</attribute>		
+		</attribute>
 	</targetType>
 	<targetType>
 		<id>unit-logic_assoc-generic</id>

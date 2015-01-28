@@ -296,6 +296,10 @@
 		<enumerator>
 			<name>FSIM</name>
 			<value>7</value>
+		</enumerator>
+		<enumerator>
+			<name>PCI_CONFIGS</name>
+			<value>8</value>
 		</enumerator>		
 		<default>NA</default>
 	</enumerationType>
@@ -813,9 +817,23 @@
 		<persistency>non-volatile</persistency>
 		<readable />
 	</attribute>
+	
 	<attribute>
-		<id>LANE_SWAP</id>
-		<description>Lane Swap (0=no,1=yes)
+		<id>PCIE_LANE_SWAP_TABLE</id>
+		<description>Lane Swap Lookup Table 
+		CK not swap = none,ck0,ck0,both
+		CK swapped  = none,ck0,ck1,both
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+			 <array>4,2</array>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+	<attribute>
+		<id>PCIE_SWAP_CLKS</id>
+		<description>Swap CK0 and CK1 (0=no,1=yes)
 		</description>
 		<simpleType>
 			<uint8_t></uint8_t>
@@ -826,6 +844,16 @@
 	<attribute>
 		<id>LANE_REVERSAL</id>
 		<description>Lane Reversal (0=no,1=yes)
+		</description>
+		<simpleType>
+			<uint8_t></uint8_t>
+		</simpleType>
+		<persistency>non-volatile</persistency>
+		<readable />
+	</attribute>
+		<attribute>
+		<id>PCIE_CLK_NUM</id>
+		<description>Interface MSB CLK number (0 = CLK0, 1 = CLK1)
 		</description>
 		<simpleType>
 			<uint8_t></uint8_t>
