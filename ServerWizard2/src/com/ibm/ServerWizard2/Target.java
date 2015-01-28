@@ -88,6 +88,9 @@ public class Target implements Comparable<Target>, java.io.Serializable {
 		return getIdPrefix() + "-" + position;
 	}
 
+	public String getRawName() {
+		return name;
+	}
 	public void setName(String name) {
 		this.name = name;
 	}

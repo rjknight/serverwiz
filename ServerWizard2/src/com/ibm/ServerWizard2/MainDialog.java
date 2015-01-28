@@ -8,11 +8,16 @@ import java.util.Vector;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -26,24 +31,22 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 
 public class MainDialog extends Dialog {
-	private Table table;
-	//private Vector<TableEditor> tableEditor;
+	
+	private TableViewer viewer;
 	private Tree tree;
 	private Tree treeBus;
 	private Text txtInstanceName;
@@ -83,8 +86,8 @@ public class MainDialog extends Dialog {
 	private Composite composite;
 	private Label lblNewLabel;
 
-	private TableEditor editor;
-
+	//private TableEditor editor;
+	private Vector<Field> attributes;
 	/**
 	 * Create the dialog.
 	 * 
@@ -343,59 +346,86 @@ public class MainDialog extends Dialog {
 				updateConnectionCombos();
 			}
 		});
+		
+		
+		//////////////////////////////////////////
+		// Create attribute table
+		
+		viewer = new TableViewer(sashForm_1, SWT.VIRTUAL | SWT.H_SCROLL
+			      | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		table = new Table(sashForm_1, SWT.BORDER | SWT.FULL_SELECTION | SWT.VIRTUAL);
-		table.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Control oldEditor = editor.getEditor();
-				if (oldEditor != null) {
-					oldEditor.dispose();
-				}
 
-				// Identify the selected row
-				TableItem item = (TableItem) e.item;
-				if (item == null)
-					return;
-
-				AttributeTableItem a = (AttributeTableItem) item.getData();
-				
-				Control newEditor = a.getAttribute().getEditor(table, a);
-				
-				newEditor.setFocus();
-				editor.setEditor(newEditor, item, 2);
-				setDirtyState(true);
-			}
-		});
-		table.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		Table table = viewer.getTable();
+		
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
+		table.setFont(SWTResourceManager.getFont("Arial", 9, SWT.NORMAL));
+		  table.addListener (SWT.CHANGED, new Listener () {
+		      public void handleEvent (Event event) {
+		    	  //System.out.println("set dirty");
+		    	  setDirtyState(true);
+		      }
+		  }); 
+			
+		final TableViewerColumn colName = new TableViewerColumn(viewer, SWT.NONE);
+		colName.getColumn().setWidth(256);
+		colName.getColumn().setText("Attribute");
+		colName.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Field f = (Field) element;
+				return f.attributeName;
+			}
+		});
+				
+		final TableViewerColumn colField = new TableViewerColumn(viewer, SWT.NONE);
+		colField.getColumn().setWidth(100);
+		colField.getColumn().setText("Field");
+		colField.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Field f = (Field) element;
+				if (f.attributeName.equals(f.name)) {
+					return "";
+				}
+				return f.name;
+			}
+		});
+				
+		final TableViewerColumn colValue = new TableViewerColumn(viewer, SWT.NONE);
+		colValue.getColumn().setWidth(100);
+		colValue.getColumn().setText("Value");
+		colValue.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Field f = (Field) element;
+				return f.value;
+			}
+		});
+		colValue.setEditingSupport(new AttributeEditingSupport(viewer));
+		
+		final TableViewerColumn colDesc = new TableViewerColumn(viewer, SWT.NONE);
+		colDesc.getColumn().setWidth(350);
+		colDesc.getColumn().setText("Description");
+		colDesc.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Field f = (Field) element;
+				return f.desc;
+			}
+		});
+				
+		viewer.setContentProvider(ArrayContentProvider.getInstance());
+		attributes = new Vector<Field>();
+		viewer.setInput(attributes); 
 
-		TableColumn tc1 = new TableColumn(table, SWT.CENTER);
-		tc1.setText("Attribute");
-		tc1.setWidth(256);
-
-		TableColumn tc2 = new TableColumn(table, SWT.CENTER);
-		tc2.setText("Field");
-		tc2.setWidth(100);
-
-		TableColumn tc3 = new TableColumn(table, SWT.LEFT);
-		tc3.setText("Value");
-		tc3.setWidth(101);
-
-		TableColumn tc4 = new TableColumn(table, SWT.LEFT);
-		tc4.setText("Description");
-		tc4.setWidth(373);
-
-		table.setHeaderVisible(true);
-
-
+		
 		sashForm_1.setWeights(new int[] { 1, 1 });
-
 		controller.init();
 
 		this.setDirtyState(false);
 		updateView();
+
 		// load file if passed on command line
 		if (!mrwFilename.isEmpty()) {
 			ServerWizard2.LOGGER.info("Loading MRW: " + mrwFilename);
@@ -403,14 +433,6 @@ public class MainDialog extends Dialog {
 			controller.readXML(mrwFilename);
 			setFilename(mrwFilename);
 		}
-		// container.pack();
-		editor = new TableEditor(table);
-		editor.horizontalAlignment = SWT.LEFT;
-		editor.grabHorizontal = true;
-		editor.grabVertical = true;
-		//editor.minimumHeight = 0;
-		// editor.minimumWidth = 50;
-
 		return container;
 	}
 
@@ -681,17 +703,7 @@ public class MainDialog extends Dialog {
 	}
 
 	private void clearTable() {
-		Control oldEditor = editor.getEditor();
-		if (oldEditor != null) {
-			oldEditor.dispose();
-		}
-		//for (int r = 0; r < tableEditor.size(); r++) {
-		//	TableEditor editor = tableEditor.get(r);
-		//	editor.getEditor().dispose();
-		//	editor.dispose();
-		//}
-		//tableEditor.removeAllElements();
-		table.removeAll();
+		
 	}
 
 	public void updateView() {
@@ -720,15 +732,18 @@ public class MainDialog extends Dialog {
 		updateConnectionCombos();
 	}
 	private void updateAttributes(Target targetInstance) {
+		attributes.clear();
 		for (Map.Entry<String, Attribute> entry : targetInstance.getAttributes().entrySet()) {
 
 			Attribute attribute = entry.getValue();
 			Boolean showAttribute = !attribute.hide;
-
+		
 			if (showAttribute) {
-				attribute.createTableRow(table);
+				for (Field field : attribute.getValue().getFields())
+				attributes.add(field);
 			}
 		}
+		viewer.refresh();
 	}
 
 	public void clearTreeAll() {

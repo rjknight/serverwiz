@@ -1,5 +1,7 @@
 package com.ibm.ServerWizard2;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class TargetWizardController {
+public class TargetWizardController implements PropertyChangeListener {
 	SystemModel model;
 	MainDialog view;
 
@@ -262,6 +264,7 @@ public class TargetWizardController {
 	}
 
 	public void addChildTargetInstances(Target target) {
+		
 		Vector<Target> v = model.getTargetInstances(target.getType());
 		if (v == null) {
 			return;
@@ -269,6 +272,7 @@ public class TargetWizardController {
 		for (int i = 0; i < v.size(); i++) {
 			Target t = v.get(i);
 			Target unitTarget = new Target(t);
+			
 			model.addTarget(target, unitTarget);
 			unitTarget.setSpecialAttributes();
 			addChildTargetInstances(unitTarget);
@@ -344,5 +348,10 @@ public class TargetWizardController {
 		} catch (Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent arg0) {
+		//view.setDirtyState(true);		
 	}
 }

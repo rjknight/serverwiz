@@ -1,5 +1,7 @@
 package com.ibm.ServerWizard2;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,26 +34,33 @@ public class SystemModel {
 	private Vector<Target> targetList = new Vector<Target>();
 	public HashMap<String, Vector<Target>> childTargetTypes = new HashMap<String, Vector<Target>>();
 	private Vector<Target> busTypes = new Vector<Target>();
-	
-		public void updateTargetSdr(SdrRecord sdr) throws Exception {
-		//Find target that matches sdr entity id and entity instance
-		ServerWizard2.LOGGER.info("Looking for matching target: "+sdr.toString());
-		Boolean imported=false;
+	private PropertyChangeSupport changes = new PropertyChangeSupport(this);
+
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		changes.addPropertyChangeListener(l);
+	}
+
+	public void updateTargetSdr(SdrRecord sdr) throws Exception {
+		// Find target that matches sdr entity id and entity instance
+		ServerWizard2.LOGGER.info("Looking for matching target: " + sdr.toString());
+		Boolean imported = false;
 		for (Target target : targetList) {
-			String strEntityId=target.getAttribute("ENTITY_ID");
-			int entityInst=target.getPosition();
+			String strEntityId = target.getAttribute("ENTITY_ID");
+			int entityInst = target.getPosition();
 			if (!strEntityId.isEmpty()) {
 				String ids[] = strEntityId.split(",");
-				for (int i=0;i<ids.length;i++) {
-					Integer entityId=getEnumValue("ENTITY_ID",ids[i]);
-					if (entityId==null) {
-						String msg=ids[i]+" is invalid for target: "+target.getName();
+				for (int i = 0; i < ids.length; i++) {
+					Integer entityId = getEnumValue("ENTITY_ID", ids[i]);
+					if (entityId == null) {
+						String msg = ids[i] + " is invalid for target: " + target.getName();
 						ServerWizard2.LOGGER.severe(msg);
 						throw new Exception(msg);
 					} else {
-						if (entityId==(int)sdr.getEntityId() && entityInst==sdr.getEntityInstance()) {
-							ServerWizard2.LOGGER.info("SDRImport: Target="+target.getName()+"; EntityID="+entityId+"; EntityInst="+entityInst);
-							imported=true;
+						if (entityId == (int) sdr.getEntityId()
+								&& entityInst == sdr.getEntityInstance()) {
+							ServerWizard2.LOGGER.info("SDRImport: Target=" + target.getName()
+									+ "; EntityID=" + entityId + "; EntityInst=" + entityInst);
+							imported = true;
 							sdr.setTarget(target);
 							sdr.setEntityName(ids[i]);
 						}
@@ -60,11 +69,12 @@ public class SystemModel {
 			}
 		}
 		if (!imported) {
-			String msg=sdr.toString()+"was not imported and is a virtual sensor.";
+			String msg = sdr.toString() + "was not imported and is a virtual sensor.";
 			ServerWizard2.LOGGER.severe(msg);
 			throw new Exception(msg);
 		}
 	}
+
 	public void initBusses(Target target) {
 		target.initBusses(busTypes);
 	}
@@ -142,6 +152,7 @@ public class SystemModel {
 				deleteTarget(deleteTarget, t);
 			}
 		}
+		changes.firePropertyChange("DELETE_TARGET", "", "");
 	}
 
 	// Reads a previously saved MRW
@@ -236,8 +247,8 @@ public class SystemModel {
 		out.write("<targetInstances>\n");
 		out.write("<version>" + ServerWizard2.VERSION + "</version>\n");
 		writeEnumeration(out);
-		//writeEnumeration(out, "CLASS");
-		//writeEnumeration(out, "MRU_PREFIX");
+		// writeEnumeration(out, "CLASS");
+		// writeEnumeration(out, "MRU_PREFIX");
 
 		for (Target target : targetList) {
 			target.writeInstanceXML(out);
@@ -257,6 +268,7 @@ public class SystemModel {
 		}
 		targetList.add(newTarget);
 		initBusses(newTarget);
+		changes.firePropertyChange("ADD_TARGET", "", "");
 	}
 
 	public Vector<Target> getTargetInstances(String n) {
@@ -335,9 +347,9 @@ public class SystemModel {
 			Attribute a = new Attribute();
 			a.readModelXML(t);
 			attributes.put(a.name, a);
-			
+
 			if (a.getValue().getType().equals("enumeration")) {
-				a.getValue().enumerator=enumerations.get(a.name);
+				a.getValue().setEnumerator(enumerations.get(a.name));
 			}
 		}
 	}
@@ -365,6 +377,7 @@ public class SystemModel {
 				throw new IOException("Target type " + targetType + " not valid");
 			}
 			Target target = new Target(modelTarget);
+			// target.setPosition(-1);
 			target.setName(instanceId);
 			instanceLookup.put(instanceId, target);
 
@@ -373,9 +386,11 @@ public class SystemModel {
 			for (int j = 0; j < childList.getLength(); ++j) {
 				// found child
 				Vector<TargetName> v = children.get(targetType);
+				// Vector<TargetName> v = children.get(instanceId);
 				if (v == null) {
 					v = new Vector<TargetName>();
 					children.put(targetType, v);
+					// children.put(instanceId, v);
 				}
 				Element c = (Element) childList.item(j);
 				String childInstanceId = c.getFirstChild().getNodeValue();
@@ -387,9 +402,11 @@ public class SystemModel {
 			for (int j = 0; j < childList.getLength(); ++j) {
 				// found child
 				Vector<TargetName> v = children.get(targetType);
+				// Vector<TargetName> v = children.get(instanceId);
 				if (v == null) {
 					v = new Vector<TargetName>();
 					children.put(targetType, v);
+					// children.put(instanceId, v);
 				}
 				Element c = (Element) childList.item(j);
 				String childInstanceId = c.getFirstChild().getNodeValue();

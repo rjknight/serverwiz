@@ -39,6 +39,7 @@ public class ServerWizard2 {
 	    MainDialog view = new MainDialog(null);
 	    tc.setView(view);
 	    tc.setModel(systemModel);
+	    systemModel.addPropertyChangeListener(tc);
 	    view.setController(tc);
 		if (args.length>0) {
 			view.mrwFilename=args[0];

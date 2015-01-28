@@ -2,10 +2,6 @@ package com.ibm.ServerWizard2;
 
 import java.io.Writer;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -47,9 +43,6 @@ public class Attribute implements java.io.Serializable {
 		}
 		else if(a.value instanceof AttributeValueNative) {
 			this.value = new AttributeValueNative((AttributeValueNative)a.value);
-		}
-		else if(a.value instanceof AttributeValueXml) {
-			this.value = new AttributeValueXml((AttributeValueXml)a.value);
 		}
 		else {
 			
@@ -111,28 +104,24 @@ public class Attribute implements java.io.Serializable {
 		if (SystemModel.isElementDefined(attribute,"writeable")) {
 			writeable=true;
 		}
-		if (SystemModel.isElementDefined(attribute,"serverwizHide")) {
+		if (SystemModel.isElementDefined(attribute,"serverwizHide") || 
+				name.equals("MODEL") || name.equals("TYPE")) {
 			hide=true;
 		}
 		Node simpleType = attribute.getElementsByTagName("simpleType").item(0);
 		if (simpleType!=null) { 
-			value = new AttributeValueSimple();
+			value = new AttributeValueSimple(this);
 			value.readXML((Element)simpleType);
 		}
 		Node complexType = attribute.getElementsByTagName("complexType").item(0);
 		if (complexType!=null) {
-			value = new AttributeValueComplex();
+			value = new AttributeValueComplex(this);
 			value.readXML((Element)complexType);
 		}
 		Node nativeType = attribute.getElementsByTagName("nativeType").item(0);
 		if (nativeType!=null) {
-			value = new AttributeValueNative();
+			value = new AttributeValueNative(this);
 			value.readXML((Element)nativeType);
-		}
-		Node xmlType = attribute.getElementsByTagName("xmlType").item(0);
-		if (xmlType!=null) {
-			value = new AttributeValueXml();
-			value.readXML((Element)xmlType);
 		}
 	}
 	public void writeBusInstanceXML(Writer out) throws Exception {
@@ -147,9 +136,7 @@ public class Attribute implements java.io.Serializable {
 		value.writeInstanceXML(out);
 		out.write("\t</attribute>\n");
 	}
-	public Control getEditor(Table table,AttributeTableItem item) {
-		return value.getEditor(table,item);
-	}
+	/*
 	public void createTableRow(Table table) {
 		TableItem item = new TableItem(table, SWT.NONE);
 		AttributeTableItem aItem = new AttributeTableItem();
@@ -183,6 +170,6 @@ public class Attribute implements java.io.Serializable {
 				cItem.setField(field);
 			}
 		}
-	}
+	}*/
 	
 }

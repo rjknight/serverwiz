@@ -1,17 +1,15 @@
 package com.ibm.ServerWizard2;
 
 import java.io.Writer;
+import java.util.Vector;
 
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 import org.w3c.dom.Element;
 
 public abstract class AttributeValue {
 	
-	public String type="";
-	public Enumerator enumerator = null;
-	protected TableItem item = null;
+	protected String type="";
+	protected Vector<Field> fields;
+	protected Attribute attribute = null;
 	
 	public abstract void readXML(Element value);
 	public abstract void readInstanceXML(Element value);
@@ -21,15 +19,29 @@ public abstract class AttributeValue {
 	public abstract void setValue(String value);
 	public abstract String toString();
 	public abstract Boolean isEmpty();
-	public abstract Control getEditor(Table table,AttributeTableItem item);
-
-	public AttributeValue() {
-		
+	public void setEnumerator(Enumerator enumerator) {
+		for (Field f : fields) {
+			f.enumerator=enumerator;
+		}
 	}
-	public AttributeValue(AttributeValue v) {
-		
+
+	public AttributeValue(Attribute attribute) {
+		fields = new Vector<Field>();
+		this.attribute=attribute;
+	}
+	public AttributeValue(AttributeValue a) {
+		fields = new Vector<Field>();	
+		for (Field f : a.fields) {
+			Field f2 = new Field(f);
+			fields.add(f2);
+		}
+		type = a.type;
+		attribute = a.attribute;
 	}
 	public String getType() {
 		return type;
+	}
+	public Vector<Field> getFields() {
+		return fields;
 	}
 }

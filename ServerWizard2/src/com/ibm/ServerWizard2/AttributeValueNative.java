@@ -2,71 +2,63 @@ package com.ibm.ServerWizard2;
 
 import java.io.Writer;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.w3c.dom.Element;
 
 public class AttributeValueNative extends AttributeValue {
-	String value = "";
-	String name = "";
+	private Field field;
 
-	public AttributeValueNative() {
-
+	public AttributeValueNative(Attribute a) {
+		super(a);
+		field = new Field();
+		field.attributeName=a.name;
+		field.desc=a.desc;
+		fields.add(field);
 	}
-
 	public AttributeValueNative(AttributeValueNative a) {
-		value = a.value;
-		name = a.name;
+		super(a);
+		field=fields.get(0);
 	}
-
 	public void readXML(Element e) {
-		value = SystemModel.getElement(e, "default");
-		name = SystemModel.getElement(e, "name");
+		field.value = SystemModel.getElement(e, "default");
+		field.name = SystemModel.getElement(e, "name");
 	}
 
 	public void readInstanceXML(Element e) {
-		value = SystemModel.getElement(e, "default");
+		field.value = SystemModel.getElement(e, "default");
 	}
 
 	@Override
 	public void writeInstanceXML(Writer out) throws Exception {
-		out.write("\t\t<default>" + value + "</default>\n");
+		out.write("\t\t<default>" + field.value + "</default>\n");
 	}
 
 	@Override
 	public String getValue() {
-		// TODO Auto-generated method stub
-		return this.value;
+		return field.value;
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return "default(" + name + ")";
+		return "default(" + field.name + ")";
 	}
 
 	@Override
 	public void setValue(String value) {
-		this.value = value;
-
+		field.value = value;
 	}
 
 	@Override
 	public Boolean isEmpty() {
-		return value.isEmpty();
+		return field.value.isEmpty();
 	}
 
 	@Override
 	public void setValue(AttributeValue value) {
 		AttributeValueNative n = (AttributeValueNative) value;
-		this.value = n.value;
-		this.name = n.name;
+		field.value = n.field.value;
+		field.name = n.field.name;
 	}
-
+/*
 	@Override
 	public Control getEditor(Table table, AttributeTableItem item) {
 		Text text = new Text(table, SWT.NONE);
@@ -86,4 +78,5 @@ public class AttributeValueNative extends AttributeValue {
 		});
 		return text;
 	}
+	*/
 }
