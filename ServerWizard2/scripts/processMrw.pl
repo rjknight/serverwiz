@@ -203,9 +203,12 @@ sub processProcessor
         {
             processFsi($targetObj, $child, $target);
         }
-        elsif ($child_type eq "PCI_CONFIG")
+        elsif ($child_type eq "PCI_CONFIGS")
         {
-            processPcie($targetObj, $child, $target);
+            foreach my $pci_child (@{ $targetObj->getTargetChildren($child) })
+            {
+               processPcie($targetObj, $pci_child, $target);
+            }
         }
         elsif ($child_type eq "MCS")
         {
@@ -281,7 +284,7 @@ sub processI2cSpeeds
     $bus_speeds[1][0] = $bus_speeds2[3];
     $bus_speeds[1][1] = $bus_speeds2[4];
     $bus_speeds[1][2] = $bus_speeds2[5];
-    
+
     my $i2cs=$targetObj->findConnections($target,"I2C","");
     if ($i2cs ne "") {
         foreach my $i2c (@{$i2cs->{CONN}}) {
@@ -290,7 +293,7 @@ sub processI2cSpeeds
             my $bus_speed=$targetObj->getBusAttribute(
                   $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
             if ($bus_speed eq "" || $bus_speed==0) {
-                print "ERROR: I2C speed bus not defined for $i2c->{SOURCE}\n";
+                print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
                 $targetObj->myExit(3);
             }
             ## choose lowest bus speed
@@ -307,7 +310,7 @@ sub processI2cSpeeds
                       $bus_speeds[1][0].",".
                       $bus_speeds[1][1].",".
                       $bus_speeds[1][2];
-                         
+
     $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);                   
 }
 
@@ -506,10 +509,10 @@ sub processPcie
     $lane_mask[1][1] = "0x0000";
 
     my @lane_rev;
-    $lane_rev[0][0] = 0;
-    $lane_rev[0][1] = 0;
-    $lane_rev[1][0] = 0;
-    $lane_rev[1][1] = 0;
+    $lane_rev[0][0] = "";
+    $lane_rev[0][1] = "";
+    $lane_rev[1][0] = "";
+    $lane_rev[1][1] = "";
 
     my @is_slot;
     $is_slot[0][0] = 0;
@@ -521,31 +524,66 @@ sub processPcie
 
     my %cfg_check;
     my @equalization;
+    
+    my $wiring_table = $targetObj->getAttribute($target,"PCIE_LANE_SWAP_TABLE");
+    $wiring_table=~s/\s+//g;
+    $wiring_table=~s/\t+//g;
+    $wiring_table=~s/\n+//g;
+    #my $config_num=oct($targetObj->getAttribute($target, "PCIE_CONFIG_NUM"));
+    
+    my @t = split(/,/,$wiring_table);
+    my %iop_swap;
+    
+    #iop_swap{iop}{clk swap}{clk group reversal}
+    $iop_swap{0}{0}{'00'}=$t[0];
+    $iop_swap{0}{0}{'01'}=$t[1];
+    $iop_swap{0}{0}{'10'}=$t[2];
+    $iop_swap{0}{0}{'11'}=$t[3];
+    $iop_swap{0}{1}{'00'}=$t[4];
+    $iop_swap{0}{1}{'01'}=$t[5];
+    $iop_swap{0}{1}{'10'}=$t[6];
+    $iop_swap{0}{1}{'11'}=$t[7];
+    
+    $iop_swap{1}{0}{'00'}=$t[8];
+    $iop_swap{1}{0}{'01'}=$t[9];
+    $iop_swap{1}{0}{'10'}=$t[10];
+    $iop_swap{1}{0}{'11'}=$t[11];
+    $iop_swap{1}{1}{'00'}=$t[12];
+    $iop_swap{1}{1}{'01'}=$t[13];
+    $iop_swap{1}{1}{'10'}=$t[14];
+    $iop_swap{1}{1}{'11'}=$t[15];
+
+    my $found=0;
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
         my $num_connections = $targetObj->getNumConnections($child);
         if ($num_connections > 0)
         {
-            my $pci_endpoint =$targetObj->getFirstConnectionDestination($child);
+            $found=1;
+            my $pci_endpoint=$targetObj->getFirstConnectionDestination($child);
+            
+            my $bus = $targetObj->getConnectionBus($target, 0);
+            my $iop_num = $targetObj->getAttribute($child, "IOP_NUM");
+            my $swap_clks=$targetObj->getBusAttribute($child, 0, 
+                         "PCIE_SWAP_CLKS");
+            
+            my $lane_rev=$targetObj->getBusAttribute($child, 0, 
+                         "LANE_REVERSAL");
+                                     
+            my $phb_num = $targetObj->getAttribute($child, "PHB_NUM");
+            my $lane_set = $targetObj->getAttribute($child, "PCIE_LANE_SET");
+            my $capi = $targetObj->getAttribute($child, "ENABLE_CAPI");
+            
             my $pci_endpoint_type =
               $targetObj->getAttribute(
                 $targetObj->getTargetParent($pci_endpoint), "CLASS");
-
-            my $bus = $targetObj->getConnectionBus($target, 0);
-            my $iop_num = $targetObj->getAttribute($child, "IOP_NUM");
-            my $phb_num = $targetObj->getAttribute($child, "PHB_NUM");
-            my $num_lanes = $targetObj->getAttribute($child, "PCIE_NUM_LANES");
-            my $lane_set = $targetObj->getAttribute($child, "PCIE_LANE_SET");
-            my $capi = $targetObj->getAttribute($child, "ENABLE_CAPI");
-            my $config_num =  
-               $targetObj->getAttribute($child, "PCIE_CONFIG_NUM");
-
+                
             if ($pci_endpoint_type eq "CARD")
             {
                 $is_slot[$iop_num][$lane_set] = 1;
             }
             $lane_swap[$iop_num][$lane_set] =
-              $targetObj->getBusAttribute($child, 0, "LANE_SWAP");
+              $targetObj->getBusAttribute($child, 0, "PCIE_SWAP_CLKS");
             $lane_mask[$iop_num][$lane_set] =
               $targetObj->getAttribute($child, "PCIE_LANE_MASK");
             $lane_rev[$iop_num][$lane_set] =
@@ -553,19 +591,11 @@ sub processPcie
             $equalization[$phb_num] = $targetObj->getBusAttribute($child, 0, 
               "PROC_PCIE_LANE_EQUALIZATION");
 
-            ## check to make sure more than 1 config is not used
-            if ($cfg_check{$iop_num} ne "")
-            {
-                if ($cfg_check{$iop_num} != $config_num)
-                {
-                    die
-"ERROR: only 1 pcie config num may be used for each iop\n";
-                }
-            }
-            $cfg_check{$iop_num} = $config_num;
             substr($phb_config, $phb_num, 1, "1");
         }
     }
+    if ($found)
+    {
     my $hex = sprintf('%X', oct("0b$phb_config"));
 
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_PHB_ACTIVE","0x" . $hex);
@@ -579,23 +609,36 @@ sub processPcie
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_LANE_MASK_BIFURCATED",
         "0,0,0,0");
 
-    my $lane_swap_attr = sprintf("%s,%s,%s,%s",
-        $lane_swap[0][0], $lane_swap[0][1],
-        $lane_swap[1][0], $lane_swap[1][1]);
+    my @iop_swap_lu;
+    my @iop_lane_swap;
+    for (my $iop=0;$iop<2;$iop++)
+    {
+        $iop_lane_swap[$iop] = $lane_swap[$iop][0] | $lane_swap[$iop][1];
+        my $lane_rev = $lane_rev[$iop][0].$lane_rev[$iop][1];
+        $iop_swap_lu[$iop]="0b".$iop_swap{$iop}{$iop_lane_swap[$iop]}{$lane_rev};
+        if ($iop_swap_lu[$iop] eq "") {
+            die "PCIE config for $iop,$iop_lane_swap[$iop],$lane_rev not found\n";
+        }
+    }
+    my $lane_swap_attr0 = sprintf("%s,%s",$iop_lane_swap[0],
+                          $iop_lane_swap[1]);
+    my $lane_swap_attr1 = sprintf("%s,0,%s,0",$iop_lane_swap[0],
+                          $iop_lane_swap[1]);
+    
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP",
-        $lane_swap_attr);
+        $lane_swap_attr0);
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_NON_BIFURCATED",
-        $lane_swap_attr);
+        $lane_swap_attr1);
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP_BIFURCATED",
         "0,0,0,0");
 
-    my $lane_rev_attr = sprintf("%s,%s,%s,%s",
-        $lane_rev[0][0], $lane_rev[0][1], $lane_rev[1][0], $lane_rev[1][1]);
+    my $lane_rev_attr = sprintf("%s,0,%s,0",
+                         oct($iop_swap_lu[0]),oct($iop_swap_lu[1]));
+    
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL",
         $lane_rev_attr);
     $targetObj->setAttribute($parentTarget,
-        "PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED",
-        $lane_rev_attr);
+        "PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED",$lane_rev_attr);
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL_BIFURCATED",
         "0,0,0,0");
 
@@ -609,7 +652,7 @@ sub processPcie
     my $equalization_str=join(',',@equalization);
     $targetObj->setAttribute($parentTarget,"PROC_PCIE_LANE_EQUALIZATION",
          $equalization_str);
-    
+    }
 }
 #--------------------------------------------------
 ## OCC
