@@ -1,5 +1,7 @@
 package com.ibm.ServerWizard2;
 
+import java.util.Vector;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxViewerCellEditor;
@@ -32,6 +34,14 @@ public class AttributeEditingSupport extends EditingSupport {
 			this.editor=e;
 		} else if (!f.array.isEmpty()) {
 			this.editor = new ArrayDialogCellEditor(viewer.getTable(),f);
+		} else if (f.type.equals("boolean")) {
+			Vector<String> tf = new Vector<String>();
+			ComboBoxViewerCellEditor e = new ComboBoxViewerCellEditor(viewer.getTable(),SWT.READ_ONLY);
+			e.setContentProvider(new ArrayContentProvider());
+			tf.add("true");
+			tf.add("false");
+			e.setInput(tf);
+			this.editor=e;
 		} else {
 			this.editor = new TextCellEditor(viewer.getTable());
 		}
